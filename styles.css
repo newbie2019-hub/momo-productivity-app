@@ -1650,11 +1650,36 @@ p {
   .hero__in,
   .strict__in {
     grid-template-columns: 1fr;
-    gap: 40px;
+    gap: 28px;
+  }
+  /* One viewport is a desktop luxury. On a phone, forcing it pushed the download
+     button clean below the fold, so the hero is content-height instead and the
+     dial shrinks to leave room for the CTA. */
+  .hero {
+    min-height: 0;
+    padding-top: 92px;
+    padding-bottom: 7vh;
+  }
+  .hero__in {
+    flex: none;
   }
   .hero .dial {
     order: -1;
+    width: min(248px, 62vw);
   }
+  .dial .ghost {
+    --gs: 0.62;
+  }
+  .hero .cue {
+    padding-top: 34px;
+  }
+  /* Smaller dial closes the gap between the buddy's hem and the label; drop the
+     label nearer the ring to keep them apart. */
+  .dial__time {
+    bottom: 8%;
+    font-size: 0.8rem;
+  }
+
   .story__in {
     grid-template-columns: 1fr;
   }
@@ -1672,11 +1697,48 @@ p {
   .grid-apps {
     max-width: 400px;
   }
+  /* Heading before the calendar once the two columns stack — the grid's source
+     order puts the calendar first, which reads as an orphan on a phone. */
+  .story__in > .cal {
+    order: 2;
+  }
+
+  /* Touch expects to swipe a shelf, not to have it dragged by vertical scroll.
+     Native overflow with snap here; the GSAP scrub is desktop-only (main.js). */
+  .shelf {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .shelf::-webkit-scrollbar {
+    display: none;
+  }
+  .belt > * {
+    scroll-snap-align: center;
+  }
+  /* Trailing gutter, so the last card doesn't butt against the screen edge. */
+  .belt::after {
+    content: '';
+    flex: none;
+    width: 1px;
+  }
 }
 
 @media (max-width: 560px) {
   body {
     font-size: 16px;
+  }
+  .legal {
+    padding-top: 104px;
+  }
+  .legal table {
+    font-size: 0.88rem;
+  }
+  .legal th,
+  .legal td {
+    padding: 9px 10px;
   }
   .phone {
     --pw: 268px;

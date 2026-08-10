@@ -256,25 +256,37 @@ if (!HAS_GSAP) {
     });
   })();
 
-  /* --- horizontal shelves ---------------------------------------------- */
-  const shelf = (beltSel, secSel) => {
-    const belt = $(beltSel);
-    const sec = $(secSel);
-    if (!belt || !sec || REDUCED) return;
-    gsap.to(belt, {
-      x: () => -Math.max(0, belt.scrollWidth - window.innerWidth + 40),
-      ease: 'none',
-      scrollTrigger: {
-        trigger: sec,
-        start: 'top bottom',
-        end: 'bottom top',
-        scrub: 0.6,
-        invalidateOnRefresh: true,
-      },
+  /* --- horizontal shelves ----------------------------------------------
+     Desktop only. On touch the shelves are native overflow-x with snap points
+     (see styles.css) — dragging a carousel with the vertical scrollbar is a
+     mouse idiom and fights a swipe. gsap.matchMedia reverts the tween and its
+     inline transform automatically when the query stops matching, which is why
+     the native scroll isn't left fighting a leftover `x`.
+     -------------------------------------------------------------------- */
+  if (!REDUCED) {
+    gsap.matchMedia().add('(min-width: 1041px)', () => {
+      const tweens = [
+        ['#castBelt', '#cast'],
+        ['#featBelt', '#more'],
+      ].map(([beltSel, secSel]) => {
+        const belt = $(beltSel);
+        const sec = $(secSel);
+        if (!belt || !sec) return null;
+        return gsap.to(belt, {
+          x: () => -Math.max(0, belt.scrollWidth - window.innerWidth + 40),
+          ease: 'none',
+          scrollTrigger: {
+            trigger: sec,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 0.6,
+            invalidateOnRefresh: true,
+          },
+        });
+      });
+      return () => tweens.forEach((t) => t && t.scrollTrigger?.kill());
     });
-  };
-  shelf('#castBelt', '#cast');
-  shelf('#featBelt', '#more');
+  }
 
   /* --- strict mode: the apps go dark ----------------------------------- */
   (() => {
