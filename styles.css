@@ -1299,8 +1299,13 @@ p {
   aspect-ratio: 1;
   border-radius: 20px;
   display: grid;
-  place-items: center;
-  gap: 4px;
+  /* place-content, NOT place-items: a grid's align-content defaults to stretch,
+     so the two auto rows each grew to half the tile and align-items centred the
+     glyph and the label inside their own halves — hence the gap between them.
+     Centring the track group keeps them together as one block. */
+  place-content: center;
+  justify-items: center;
+  gap: 8px;
   position: relative;
   background: var(--alt);
   border: 1px solid var(--line);
