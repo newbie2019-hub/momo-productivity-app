@@ -73,6 +73,23 @@ Two things to know if you touch it:
 Only the `idle` sheets shipped with the app, so `busy` / `sad` / `celebrating`
 are expressed as transforms on the idle loop.
 
+## The Strict Mode app grid
+
+The tiles are **category icons, not brand logos** — a blue chat app, a red video
+app, a pink photos app. They read as a home screen at a glance without naming
+anyone.
+
+That's deliberate. Reproducing real marks (Instagram, TikTok, YouTube…) is a
+trademark question, depicting named brands as *blocked* in store-listing
+marketing is a review risk, and hand-drawn approximations of someone's logo look
+worse than a clean generic icon anyway.
+
+If you decide you want the real thing, every major platform publishes an official
+brand-asset kit — drop the SVGs in and swap the `<use href="#i-…">` for an
+`<img>` inside `.tile__ico`; the squircle, shadow, lock badge and blocking
+animation all keep working. Check each platform's brand guidelines first, several
+explicitly forbid showing their mark altered or disparaged.
+
 ## Device mockups
 
 The screens inside the phone frame are rebuilt in CSS from the app's real design

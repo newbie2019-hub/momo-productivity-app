@@ -334,41 +334,69 @@
 
       <!-- Category tiles, not real logos — the point is the state change, and
            borrowing brand marks to show them "blocked" isn't ours to do. -->
+      <!-- A home screen, not brand logos: universally-readable category icons.
+           Reproducing real marks (and showing them "blocked") is a trademark
+           question and a store-review risk — see README. -->
       <div class="grid-apps" id="blockGrid" aria-hidden="true">
         <div class="tile" data-i="0">
-          <svg viewBox="0 0 24 24"><use href="#i-chat" /></svg><b>Social</b>
-          <span class="tile__lock"><svg viewBox="0 0 24 24"><use href="#i-lock" /></svg></span>
+          <span class="tile__ico" style="--c1: #5b9dff; --c2: #2563eb">
+            <svg viewBox="0 0 24 24"><use href="#i-chat" /></svg>
+            <span class="tile__lock"><svg viewBox="0 0 24 24"><use href="#i-lock" /></svg></span>
+          </span>
+          <b>Chat</b>
         </div>
         <div class="tile" data-i="1">
-          <svg viewBox="0 0 24 24"><use href="#i-play" /></svg><b>Video</b>
-          <span class="tile__lock"><svg viewBox="0 0 24 24"><use href="#i-lock" /></svg></span>
+          <span class="tile__ico" style="--c1: #ff6b60; --c2: #d92d20">
+            <svg viewBox="0 0 24 24"><use href="#i-play" /></svg>
+            <span class="tile__lock"><svg viewBox="0 0 24 24"><use href="#i-lock" /></svg></span>
+          </span>
+          <b>Video</b>
         </div>
         <div class="tile" data-i="2">
-          <svg viewBox="0 0 24 24"><use href="#i-game" /></svg><b>Games</b>
-          <span class="tile__lock"><svg viewBox="0 0 24 24"><use href="#i-lock" /></svg></span>
+          <span class="tile__ico" style="--c1: #ffa25c; --c2: #ff4d8d">
+            <svg viewBox="0 0 24 24"><use href="#i-camera" /></svg>
+            <span class="tile__lock"><svg viewBox="0 0 24 24"><use href="#i-lock" /></svg></span>
+          </span>
+          <b>Photos</b>
         </div>
         <div class="tile" data-i="3">
-          <svg viewBox="0 0 24 24"><use href="#i-camera" /></svg><b>Photos</b>
-          <span class="tile__lock"><svg viewBox="0 0 24 24"><use href="#i-lock" /></svg></span>
+          <span class="tile__ico" style="--c1: #b195fb; --c2: #6d28d9">
+            <svg viewBox="0 0 24 24"><use href="#i-game" /></svg>
+            <span class="tile__lock"><svg viewBox="0 0 24 24"><use href="#i-lock" /></svg></span>
+          </span>
+          <b>Games</b>
         </div>
         <div class="tile tile--momo" data-momo>
-          <img src="assets/img/icon.webp" alt="" /><b>Momo</b>
+          <span class="tile__ico"><img src="assets/img/icon.webp" alt="" /></span>
+          <b>Momo</b>
         </div>
         <div class="tile" data-i="4">
-          <svg viewBox="0 0 24 24"><use href="#i-cart" /></svg><b>Shop</b>
-          <span class="tile__lock"><svg viewBox="0 0 24 24"><use href="#i-lock" /></svg></span>
+          <span class="tile__ico" style="--c1: #fdc45c; --c2: #f59e0b">
+            <svg viewBox="0 0 24 24"><use href="#i-cart" /></svg>
+            <span class="tile__lock"><svg viewBox="0 0 24 24"><use href="#i-lock" /></svg></span>
+          </span>
+          <b>Shop</b>
         </div>
         <div class="tile" data-i="5">
-          <svg viewBox="0 0 24 24"><use href="#i-news" /></svg><b>News</b>
-          <span class="tile__lock"><svg viewBox="0 0 24 24"><use href="#i-lock" /></svg></span>
+          <span class="tile__ico" style="--c1: #9fb0c4; --c2: #475569">
+            <svg viewBox="0 0 24 24"><use href="#i-news" /></svg>
+            <span class="tile__lock"><svg viewBox="0 0 24 24"><use href="#i-lock" /></svg></span>
+          </span>
+          <b>News</b>
         </div>
         <div class="tile" data-i="6">
-          <svg viewBox="0 0 24 24"><use href="#i-music" /></svg><b>Music</b>
-          <span class="tile__lock"><svg viewBox="0 0 24 24"><use href="#i-lock" /></svg></span>
+          <span class="tile__ico" style="--c1: #fb8ea0; --c2: #e11d48">
+            <svg viewBox="0 0 24 24"><use href="#i-music" /></svg>
+            <span class="tile__lock"><svg viewBox="0 0 24 24"><use href="#i-lock" /></svg></span>
+          </span>
+          <b>Music</b>
         </div>
         <div class="tile" data-i="7">
-          <svg viewBox="0 0 24 24"><use href="#i-mail" /></svg><b>Mail</b>
-          <span class="tile__lock"><svg viewBox="0 0 24 24"><use href="#i-lock" /></svg></span>
+          <span class="tile__ico" style="--c1: #5fccf7; --c2: #0284c7">
+            <svg viewBox="0 0 24 24"><use href="#i-mail" /></svg>
+            <span class="tile__lock"><svg viewBox="0 0 24 24"><use href="#i-lock" /></svg></span>
+          </span>
+          <b>Mail</b>
         </div>
       </div>
     </div>
