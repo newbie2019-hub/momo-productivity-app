@@ -1,0 +1,1648 @@
+/* ===========================================================================
+   Momo — marketing site
+
+   Palette and type are lifted from the app's own design system
+   (momo/docs/design.md + src/constants/theme.ts). The site commits to the app's
+   DARK theme: warm brown-black, coral, sage, gold. Deliberately one look — this
+   is the product's face, not a themeable surface.
+   =========================================================================== */
+
+:root {
+  /* app dark tokens, verbatim */
+  --bg: #231d1a;
+  --surface: #2e2724;
+  --alt: #3a322e;
+  --coral: #ffab8b;
+  --coral-soft: #4a342b;
+  --sage: #9cc3a6;
+  --gold: #f5c24b;
+  --ink: #f7efe6;
+  --muted: #c4b6aa;
+  --rose: #e89a9a;
+  --line: #453b36;
+
+  /* one step darker than --bg, for wells the eye should read as "behind" */
+  --well: #1c1715;
+
+  --shadow-sm: 0 2px 8px rgb(0 0 0 / 0.3);
+  --shadow-md: 0 14px 34px -10px rgb(0 0 0 / 0.5);
+  --shadow-lg: 0 44px 86px -34px rgb(0 0 0 / 0.75);
+
+  --display: 'Baloo 2', system-ui, sans-serif;
+  --body: 'Nunito', system-ui, sans-serif;
+  --mono: 'DM Mono', ui-monospace, monospace;
+
+  /* everything rounded — the app has no sharp corners */
+  --r-card: 24px;
+  --r-chip: 16px;
+  --r-pill: 999px;
+
+  --gut: clamp(20px, 5vw, 40px);
+  --bay: clamp(88px, 14vh, 168px);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  /* No scroll-behavior here: Lenis owns scrolling, and CSS smooth fights it. */
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 17px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+a {
+  color: inherit;
+}
+svg {
+  display: block;
+}
+
+:focus-visible {
+  outline: 3px solid var(--coral);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+.wrap {
+  width: 100%;
+  max-width: 1180px;
+  margin-inline: auto;
+  padding-inline: var(--gut);
+}
+
+.skip {
+  position: absolute;
+  left: -9999px;
+}
+.skip:focus {
+  left: 16px;
+  top: 16px;
+  z-index: 100;
+  background: var(--surface);
+  padding: 12px 18px;
+  border-radius: var(--r-pill);
+  box-shadow: var(--shadow-md);
+}
+
+/* --- type ---------------------------------------------------------------- */
+
+h1,
+h2,
+h3 {
+  font-family: var(--display);
+  font-weight: 700;
+  line-height: 1.06;
+  letter-spacing: -0.015em;
+  margin: 0;
+  text-wrap: balance;
+}
+h1 {
+  font-size: clamp(2.5rem, 5.6vw, 4.15rem);
+}
+h2 {
+  font-size: clamp(2rem, 4.6vw, 3.1rem);
+}
+h3 {
+  font-size: 1.3rem;
+  line-height: 1.22;
+}
+p {
+  margin: 0;
+}
+
+.lede {
+  font-size: clamp(1.05rem, 1.7vw, 1.28rem);
+  color: var(--muted);
+  max-width: 46ch;
+  line-height: 1.6;
+}
+
+/* Timestamps are the page's structural device: the site is one 25-minute
+   session, and each act is stamped with where you are inside it. */
+.stamp {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--coral);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.stamp::after {
+  content: '';
+  width: 28px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.4;
+}
+
+/* --- buttons ------------------------------------------------------------- */
+
+.btn {
+  font-family: var(--body);
+  font-weight: 700;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 15px 28px;
+  border-radius: var(--r-pill);
+  border: 0;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    transform 0.24s cubic-bezier(0.34, 1.4, 0.64, 1),
+    box-shadow 0.24s ease,
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+/* Dark ground: coral carries dark text, not white — it's the readable pairing. */
+.btn--primary {
+  background: var(--coral);
+  color: #2b211c;
+  box-shadow: 0 10px 26px -10px rgb(255 171 139 / 0.6);
+}
+.btn--ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 1.5px solid var(--line);
+}
+.btn--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px -12px rgb(255 171 139 / 0.7);
+}
+.btn--ghost:hover {
+  transform: translateY(-2px);
+  border-color: var(--coral);
+  color: var(--coral);
+}
+.btn:active {
+  transform: translateY(0) scale(0.985);
+}
+.btn--sm {
+  padding: 10px 20px;
+  font-size: 0.9rem;
+}
+
+/* Android isn't shipping yet — say so plainly instead of offering a dead link. */
+.btn--soon {
+  background: transparent;
+  color: var(--muted);
+  border: 1.5px dashed var(--line);
+  cursor: default;
+}
+.btn--soon:hover {
+  transform: none;
+}
+.btn--soon::after {
+  content: 'Coming soon';
+  font-weight: 400;
+  font-size: 0.82rem;
+  opacity: 0.75;
+}
+
+/* --- header -------------------------------------------------------------- */
+
+.hdr {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 40;
+  background: color-mix(in srgb, var(--bg) 84%, transparent);
+  backdrop-filter: blur(14px) saturate(1.3);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.3s ease;
+}
+.hdr.is-stuck {
+  border-bottom-color: var(--line);
+}
+.hdr__in {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  height: 68px;
+}
+.mark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 1.32rem;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+}
+.mark img {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+}
+.hdr__clock {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+.hdr__bar {
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  height: 2px;
+  width: 100%;
+  transform: scaleX(var(--p, 0));
+  transform-origin: 0 50%;
+  background: linear-gradient(90deg, var(--coral), var(--gold));
+}
+@media (max-width: 640px) {
+  .hdr__clock {
+    display: none;
+  }
+  .hdr__cta {
+    margin-left: auto;
+  }
+}
+
+/* --- the ghost sprite ---------------------------------------------------
+   Real app art. Each sheet is a 6x6 row-major grid of 36 frames at 12fps
+   (momo/src/components/character/character.tsx). Two stepped keyframes walk the
+   grid: x cycles every 6 frames, y advances one row per x cycle.
+
+   Size is width/height scaled by --gs, NOT transform: scale(). A transform
+   shrinks the paint but leaves a full-size layout box, which is what pushed the
+   marketplace characters out of their cards. background-size is a percentage of
+   the box, so scaling the box scales the sprite correctly — and it leaves
+   `transform` free for the per-state animations below.
+   ---------------------------------------------------------------------- */
+
+.ghost {
+  --gs: 1;
+  width: calc(var(--fw) * var(--gs));
+  height: calc(var(--fh) * var(--gs));
+  background-image: var(--sheet);
+  background-repeat: no-repeat;
+  background-size: 600% 600%;
+  /* `jump-none` is load-bearing: plain steps(6) is jump-end, which lands on
+     0/16.7/33.3/50/66.7/83.3% and never reaches the last frame — every position
+     then falls between two frames and you see two half-ghosts. jump-none gives
+     the six positions a 6-frame strip needs: 0/20/40/60/80/100%. */
+  animation:
+    ghost-x var(--row, 0.5s) steps(6, jump-none) infinite,
+    ghost-y calc(var(--row, 0.5s) * 6) steps(6, jump-none) infinite;
+  transform-origin: 50% 90%;
+  transition:
+    filter 0.6s ease,
+    opacity 0.6s ease;
+}
+@keyframes ghost-x {
+  from {
+    background-position-x: 0%;
+  }
+  to {
+    background-position-x: 100%;
+  }
+}
+@keyframes ghost-y {
+  from {
+    background-position-y: 0%;
+  }
+  to {
+    background-position-y: 100%;
+  }
+}
+
+.ghost--default {
+  --sheet: url('assets/sprites/ghost.webp');
+  --fw: 240px;
+  --fh: 248px;
+}
+.ghost--mint {
+  --sheet: url('assets/sprites/ghost-mint.webp');
+  --fw: 200px;
+  --fh: 309px;
+}
+.ghost--shadow {
+  --sheet: url('assets/sprites/ghost-shadow.webp');
+  --fw: 185px;
+  --fh: 305px;
+}
+
+/* Only `idle` art shipped with the app, so the other states are expressed with
+   transforms on the idle loop — same read, no missing sheets. */
+.ghost[data-state='busy'] {
+  --row: 0.42s;
+  animation-name: ghost-x, ghost-y, ghost-work;
+  animation-duration: var(--row), calc(var(--row) * 6), 2.4s;
+  animation-timing-function: steps(6, jump-none), steps(6, jump-none), ease-in-out;
+  animation-iteration-count: infinite, infinite, infinite;
+}
+.ghost[data-state='sad'] {
+  --row: 0.78s;
+  filter: saturate(0.4) brightness(0.9);
+  opacity: 0.7;
+  transform: translateY(6px) scale(1.04, 0.9) rotate(-4deg);
+}
+.ghost[data-state='celebrating'] {
+  --row: 0.3s;
+  animation-name: ghost-x, ghost-y, ghost-cheer;
+  animation-duration: var(--row), calc(var(--row) * 6), 0.62s;
+  animation-timing-function: steps(6, jump-none), steps(6, jump-none),
+    cubic-bezier(0.3, 1.5, 0.5, 1);
+  animation-iteration-count: infinite, infinite, infinite;
+}
+@keyframes ghost-work {
+  0%,
+  100% {
+    transform: rotate(-1.6deg);
+  }
+  50% {
+    transform: rotate(1.6deg);
+  }
+}
+@keyframes ghost-cheer {
+  0%,
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+  35% {
+    transform: translateY(-14px) scale(0.95, 1.08);
+  }
+  70% {
+    transform: translateY(0) scale(1.07, 0.94);
+  }
+}
+
+/* --- hero ---------------------------------------------------------------- */
+
+/* The hero owns exactly one viewport: content centred, scroll cue pinned to the
+   bottom edge. Fixed paddings left a dead band under the fold on tall screens. */
+.hero {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: 118px;
+  padding-bottom: 26px;
+}
+.hero__in {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: clamp(28px, 5vw, 72px);
+  align-items: center;
+  /* Grow into the leftover height and centre inside it, so the slack is shared
+     above and below the content instead of pooling under it. */
+  flex: 1;
+  align-content: center;
+}
+.hero h1 {
+  margin-bottom: 26px;
+}
+.pre {
+  display: block;
+  font-size: 0.4em;
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: 0;
+  color: var(--muted);
+  margin-bottom: 0.12em;
+}
+
+/* The changing word is the product's whole idea, so the type says it. */
+.cycler {
+  display: grid;
+  justify-items: start;
+  color: var(--coral);
+}
+.cycler > span {
+  grid-area: 1 / 1;
+  opacity: 0;
+  transform: translateY(0.42em) rotate(2deg);
+  transition:
+    opacity 0.42s ease,
+    transform 0.52s cubic-bezier(0.2, 1.3, 0.4, 1);
+}
+.cycler > span.is-on {
+  opacity: 1;
+  transform: none;
+}
+
+.hero__cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 34px;
+}
+/* Four true things, stated flatly. Real capabilities, not invented metrics. */
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 26px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.facts li {
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface) 60%, transparent);
+  border-radius: var(--r-pill);
+  padding: 6px 13px;
+}
+.facts li b {
+  color: var(--coral);
+  font-weight: 500;
+}
+
+.hero__note {
+  margin-top: 18px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+.hero__note b {
+  color: var(--sage);
+}
+
+/* Ghost inside a live timer ring — the hero states the thesis in one image. */
+.dial {
+  position: relative;
+  display: grid;
+  place-items: center;
+  justify-self: center;
+  width: min(400px, 82vw);
+  aspect-ratio: 1;
+}
+.dial__ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.dial__ring circle {
+  fill: none;
+  stroke-width: 5.5;
+  stroke-linecap: round;
+}
+.dial__track {
+  stroke: var(--coral-soft);
+}
+.dial__fill {
+  stroke: var(--coral);
+  stroke-dasharray: 339.29;
+  stroke-dashoffset: calc(339.29 * (1 - var(--p, 0)));
+  transition: stroke-dashoffset 0.5s linear;
+}
+.dial__glow {
+  position: absolute;
+  width: 74%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--coral-soft), transparent 68%);
+  opacity: 0.7;
+  animation: breathe 5.5s ease-in-out infinite;
+}
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.09);
+    opacity: 0.85;
+  }
+}
+.dial .ghost {
+  --gs: 0.92;
+  position: relative;
+  z-index: 1;
+}
+/* Three motes drifting around the buddy: the only decoration in the hero, and
+   it's the app's own "focusing" mood rather than generic particles. */
+.spark {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--coral);
+  opacity: 0;
+  animation: drift 7s ease-in-out infinite;
+}
+.spark:nth-of-type(1) {
+  left: 14%;
+  top: 34%;
+  animation-delay: 0s;
+}
+.spark:nth-of-type(2) {
+  right: 12%;
+  top: 52%;
+  width: 5px;
+  height: 5px;
+  background: var(--gold);
+  animation-delay: 2.4s;
+}
+.spark:nth-of-type(3) {
+  left: 30%;
+  bottom: 18%;
+  width: 4px;
+  height: 4px;
+  background: var(--sage);
+  animation-delay: 4.6s;
+}
+@keyframes drift {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.6);
+  }
+  30%,
+  62% {
+    opacity: 0.85;
+  }
+  50% {
+    transform: translateY(-16px) scale(1);
+  }
+}
+
+.dial__time {
+  position: absolute;
+  bottom: 13%; /* inside the ring, clear of both the stroke and the buddy */
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.cue {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: clamp(28px, 5vh, 56px);
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.cue span {
+  width: 1px;
+  height: 34px;
+  background: linear-gradient(var(--muted), transparent);
+  animation: cue-fall 1.9s ease-in-out infinite;
+  transform-origin: top;
+}
+@keyframes cue-fall {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+/* --- story: sticky phone (left) + acts (right) -------------------------- */
+
+.story__in {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: clamp(32px, 6vw, 96px);
+  align-items: start;
+}
+.rail {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+.acts {
+  display: flex;
+  flex-direction: column;
+}
+.act {
+  min-height: 84vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-block: 6vh;
+}
+.act h2 {
+  margin-bottom: 18px;
+}
+.act__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 26px;
+}
+
+/* --- phone mockup -------------------------------------------------------
+   A CSS device frame with the app's screens rebuilt inside it from the same
+   tokens. Swap a `.screen` for an <img> of a real capture and the frame,
+   shadow, radii and Dynamic Island keep working.
+   ---------------------------------------------------------------------- */
+
+.phone {
+  --pw: 306px;
+  width: var(--pw);
+  aspect-ratio: 306 / 628;
+  background: linear-gradient(150deg, #575049, #211c19 55%, #423a34);
+  border-radius: 48px;
+  padding: 9px;
+  box-shadow:
+    var(--shadow-lg),
+    0 0 0 1px rgb(255 255 255 / 0.1) inset;
+  position: relative;
+}
+.phone::after {
+  content: '';
+  position: absolute;
+  right: -2px;
+  top: 30%;
+  width: 2px;
+  height: 46px;
+  border-radius: 2px;
+  background: #6a6058;
+}
+.phone__screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 40px;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+/* Dynamic Island. It's the real device element, so it's the honest place to
+   show a Live Activity — it expands when a session is running. */
+.notch {
+  position: absolute;
+  top: 9px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 78px;
+  height: 22px;
+  border-radius: var(--r-pill);
+  background: #100d0c;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  overflow: hidden;
+  transition:
+    width 0.62s cubic-bezier(0.3, 1.35, 0.4, 1),
+    height 0.62s cubic-bezier(0.3, 1.35, 0.4, 1),
+    background 0.4s ease;
+}
+.phone[data-island='on'] .notch,
+.phone[data-island='grace'] .notch {
+  width: 196px;
+  height: 38px;
+}
+.phone[data-island='grace'] .notch {
+  background: #2a1414;
+}
+.notch__in {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  transform: scale(0.7);
+  transition:
+    opacity 0.3s ease 0.16s,
+    transform 0.42s cubic-bezier(0.3, 1.4, 0.4, 1) 0.16s;
+}
+.phone[data-island='on'] .notch__in,
+.phone[data-island='grace'] .notch__in {
+  opacity: 1;
+  transform: none;
+}
+.notch .ghost {
+  --gs: 0.078;
+}
+.notch__t {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 0.76rem;
+  color: #f7efe6;
+  font-variant-numeric: tabular-nums;
+}
+.notch__bar {
+  width: 46px;
+  height: 3px;
+  border-radius: var(--r-pill);
+  background: rgb(255 255 255 / 0.22);
+  overflow: hidden;
+}
+.notch__bar i {
+  display: block;
+  height: 100%;
+  width: calc(var(--p, 0) * 100%);
+  background: var(--coral);
+  border-radius: var(--r-pill);
+}
+.phone[data-island='grace'] .notch__t {
+  color: var(--rose);
+}
+.phone[data-island='grace'] .notch__bar i {
+  background: var(--rose);
+}
+
+/* Screens stack and crossfade as the story advances. */
+.screen {
+  position: absolute;
+  inset: 0;
+  padding: 42px 16px 0;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.55s ease,
+    visibility 0.55s;
+}
+.screen.is-on {
+  opacity: 1;
+  visibility: visible;
+}
+
+.sc__hi {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 1.08rem;
+  line-height: 1.2;
+}
+.sc__sub {
+  font-size: 0.68rem;
+  color: var(--muted);
+  margin-top: 1px;
+}
+.chips {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  padding: 4px 9px;
+  font-size: 0.66rem;
+  font-weight: 700;
+}
+.chip--coin {
+  color: var(--gold);
+  background: color-mix(in srgb, var(--gold) 14%, var(--surface));
+  border-color: color-mix(in srgb, var(--gold) 30%, var(--line));
+}
+.chip--streak {
+  color: var(--sage);
+  background: color-mix(in srgb, var(--sage) 12%, var(--surface));
+  border-color: color-mix(in srgb, var(--sage) 28%, var(--line));
+}
+
+.sc__stage {
+  flex: 1;
+  display: grid;
+  place-items: center;
+}
+.sc__stage .ghost {
+  --gs: 0.58;
+}
+.sc__stage[data-scale='sm'] .ghost {
+  --gs: 0.46;
+}
+
+.durs {
+  display: flex;
+  gap: 7px;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+.dur {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 0.82rem;
+  min-width: 42px;
+  padding: 8px 4px;
+  text-align: center;
+  border-radius: var(--r-chip);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+.dur small {
+  display: block;
+  font-family: var(--body);
+  font-size: 0.54rem;
+  font-weight: 700;
+  opacity: 0.7;
+}
+.dur.is-on {
+  background: var(--coral);
+  border-color: var(--coral);
+  color: #2b211c;
+  transform: scale(1.06);
+}
+
+.sc__btn {
+  text-align: center;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 0.94rem;
+  background: var(--coral);
+  color: #2b211c;
+  border-radius: var(--r-pill);
+  padding: 13px;
+  margin-bottom: 10px;
+}
+
+.tabs {
+  display: flex;
+  justify-content: space-around;
+  padding: 9px 0 16px;
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+  margin: 0 -16px;
+}
+.tab {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  background: var(--line);
+}
+.tab.is-on {
+  background: var(--coral);
+}
+
+.sc__timer {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 2.5rem;
+  letter-spacing: -0.02em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  margin-top: 6px;
+}
+.sc__label {
+  text-align: center;
+  font-size: 0.66rem;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.sc__track {
+  height: 5px;
+  border-radius: var(--r-pill);
+  background: var(--coral-soft);
+  overflow: hidden;
+  margin: 14px 4px 0;
+}
+.sc__track i {
+  display: block;
+  height: 100%;
+  border-radius: var(--r-pill);
+  background: var(--coral);
+  width: calc(var(--p, 0) * 100%);
+}
+.sc__hint {
+  text-align: center;
+  font-size: 0.63rem;
+  color: var(--muted);
+  padding-bottom: 20px;
+}
+.sc__hint b {
+  color: var(--rose);
+}
+
+.rewards {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+.reward {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-chip);
+  padding: 9px 6px;
+  text-align: center;
+}
+.reward b {
+  display: block;
+  font-family: var(--display);
+  font-size: 1.05rem;
+  line-height: 1.1;
+}
+.reward small {
+  font-size: 0.56rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+.reward--xp b {
+  color: var(--coral);
+}
+.reward--coin b {
+  color: var(--gold);
+}
+.reward--streak b {
+  color: var(--sage);
+}
+
+/* --- lockscreen (inside the phone) ------------------------------------- */
+
+.screen--lock {
+  padding: 0;
+  background: linear-gradient(168deg, #2b2320, #14100f 62%, #241d1a);
+  justify-content: flex-start;
+  align-items: center;
+}
+.lockface {
+  padding-top: 58px;
+  text-align: center;
+  color: #f7efe6;
+}
+.lockface__d {
+  font-size: 0.68rem;
+  opacity: 0.66;
+  letter-spacing: 0.02em;
+}
+.lockface__t {
+  font-family: var(--mono);
+  font-weight: 400;
+  font-size: 3.5rem;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+/* The Live Activity card, as it sits on a real lockscreen. */
+.la {
+  margin-top: auto;
+  margin-bottom: 26px;
+  width: calc(100% - 24px);
+  background: rgb(247 239 230 / 0.09);
+  border: 1px solid rgb(247 239 230 / 0.16);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 11px 13px;
+  color: #f7efe6;
+  display: grid;
+  gap: 8px;
+}
+.la__top {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+.la__top img {
+  width: 17px;
+  height: 17px;
+  border-radius: 5px;
+}
+.la__top span {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.la__body {
+  display: flex;
+  align-items: flex-end;
+  gap: 9px;
+}
+.la .ghost {
+  --gs: 0.16;
+  flex: none;
+}
+.la__side {
+  flex: 1;
+  display: grid;
+  gap: 6px;
+  padding-bottom: 3px;
+}
+.la__lbl {
+  font-size: 0.62rem;
+  opacity: 0.7;
+}
+.la__track {
+  height: 4px;
+  border-radius: var(--r-pill);
+  background: rgb(247 239 230 / 0.2);
+  overflow: hidden;
+}
+.la__track i {
+  display: block;
+  height: 100%;
+  width: calc(var(--p, 0) * 100%);
+  border-radius: var(--r-pill);
+  background: var(--coral);
+}
+
+/* --- generic sections --------------------------------------------------- */
+
+.sec {
+  padding-block: var(--bay);
+}
+/* No max-width here: .sec__head is used together with .wrap, whose
+   `margin-inline: auto` would then centre the whole header instead of leaving it
+   on the gutter. The h2 and .lede constrain their own measure. */
+.sec__head {
+  margin-bottom: clamp(36px, 5vw, 60px);
+}
+.sec__head h2 {
+  margin-bottom: 16px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1),
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
+}
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+  border-color: color-mix(in srgb, var(--coral) 34%, var(--line));
+}
+
+/* --- cast shelf --------------------------------------------------------- */
+
+.shelf {
+  overflow: hidden;
+}
+.belt {
+  display: flex;
+  gap: 18px;
+  padding-inline: var(--gut);
+  width: max-content;
+}
+.cast .card {
+  width: 210px;
+  padding: 22px;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  text-align: center;
+}
+/* Fixed art row + bottom-centred: every character sits on the same baseline
+   regardless of how tall its frame is. */
+.cast__art {
+  height: 168px;
+  display: grid;
+  place-items: end center;
+}
+.cast .card .ghost {
+  --gs: 0.52;
+}
+.cast__art img {
+  max-height: 152px;
+  width: auto;
+}
+.card__name {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 1rem;
+}
+.card__cost {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--gold);
+  background: color-mix(in srgb, var(--gold) 16%, transparent);
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+}
+
+/* --- feature shelf (horizontal) ---------------------------------------- */
+
+.feat .card {
+  width: 340px;
+  padding: 28px;
+  display: grid;
+  align-content: start;
+  gap: 14px;
+}
+.feat__art {
+  height: 158px;
+  border-radius: 18px;
+  background: var(--well);
+  border: 1px solid var(--line);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  position: relative;
+}
+.feat__ico {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--coral) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--coral) 30%, var(--line));
+  color: var(--coral);
+}
+.feat__ico svg {
+  width: 22px;
+  height: 22px;
+}
+.feat h3 {
+  font-family: var(--display);
+}
+.feat p {
+  color: var(--muted);
+  font-size: 0.98rem;
+}
+.feat .ghost {
+  --gs: 0.3;
+}
+
+/* badge trio inside a feature card */
+.badges {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.badges img {
+  width: 62px;
+  height: 62px;
+  filter: drop-shadow(0 6px 12px rgb(0 0 0 / 0.4));
+}
+.badges img:nth-child(2) {
+  width: 82px;
+  height: 82px;
+}
+
+/* mini heatmap */
+.heat {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 4px;
+  padding: 18px;
+  width: 100%;
+}
+.heat i {
+  aspect-ratio: 1;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--coral) calc(var(--v) * 1%), var(--alt));
+}
+
+/* mini streak strip */
+.strip {
+  display: flex;
+  gap: 6px;
+}
+.strip i {
+  width: 20px;
+  height: 30px;
+  border-radius: 7px;
+  background: var(--alt);
+  border: 1px solid var(--line);
+}
+.strip i.on {
+  background: var(--sage);
+  border-color: var(--sage);
+}
+
+.faces {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+.face {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  text-align: center;
+}
+.face > div {
+  height: 92px;
+  display: grid;
+  place-items: end center;
+}
+.face .ghost {
+  --gs: 0.28;
+}
+.face b {
+  font-family: var(--display);
+  font-size: 0.8rem;
+}
+.face small {
+  font-size: 0.6rem;
+  color: var(--sage);
+  font-weight: 700;
+}
+.face small.off {
+  color: var(--muted);
+}
+
+/* --- strict mode: apps going dark ------------------------------------- */
+
+.strict__in {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: clamp(32px, 6vw, 84px);
+  align-items: center;
+}
+.grid-apps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  padding: 26px;
+  background: var(--well);
+  border: 1px solid var(--line);
+  border-radius: 30px;
+}
+.tile {
+  aspect-ratio: 1;
+  border-radius: 20px;
+  display: grid;
+  place-items: center;
+  gap: 4px;
+  position: relative;
+  background: var(--alt);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  transition:
+    filter 0.55s ease,
+    opacity 0.55s ease,
+    transform 0.55s cubic-bezier(0.34, 1.3, 0.64, 1);
+}
+.tile svg {
+  width: 26px;
+  height: 26px;
+}
+.tile b {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+/* The lock badge is the payoff, so it arrives with a little pop. */
+.tile__lock {
+  position: absolute;
+  right: -6px;
+  top: -6px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--rose);
+  color: #241816;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  transform: scale(0.3);
+  transition:
+    opacity 0.3s ease,
+    transform 0.45s cubic-bezier(0.3, 1.6, 0.4, 1);
+}
+.tile__lock svg {
+  width: 12px;
+  height: 12px;
+}
+.tile.is-blocked {
+  filter: grayscale(1);
+  opacity: 0.34;
+  transform: scale(0.92);
+}
+.tile.is-blocked .tile__lock {
+  opacity: 1;
+  transform: none;
+}
+/* Momo stays lit — it's the one app the session doesn't lock you out of. */
+.tile--momo {
+  background: color-mix(in srgb, var(--coral) 14%, var(--alt));
+  border-color: color-mix(in srgb, var(--coral) 46%, var(--line));
+  color: var(--coral);
+}
+.tile--momo img {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+}
+.tile--momo.is-lit {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--coral) 26%, transparent);
+}
+
+/* --- streak calendar ---------------------------------------------------- */
+
+.cal {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  max-width: 340px;
+}
+.cal i {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  background: var(--alt);
+  border: 1px solid var(--line);
+}
+.cal i.on {
+  background: var(--sage);
+  border-color: var(--sage);
+}
+.cal i.today {
+  background: var(--coral);
+  border-color: var(--coral);
+}
+
+/* --- closing + footer -------------------------------------------------- */
+
+.close {
+  text-align: center;
+  padding-block: clamp(100px, 16vh, 180px);
+}
+.close h2 {
+  font-size: clamp(2.4rem, 6.4vw, 4.2rem);
+  margin-bottom: 20px;
+}
+.close .lede {
+  margin-inline: auto;
+}
+.close__cta {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 34px;
+}
+.close__fine {
+  margin-top: 20px;
+  font-size: 0.84rem;
+  color: var(--muted);
+}
+
+.ft {
+  border-top: 1px solid var(--line);
+  padding-block: 44px 52px;
+}
+.ft__in {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px 32px;
+  align-items: center;
+}
+.ft nav {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+.ft a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.92rem;
+  transition: color 0.2s ease;
+}
+.ft a:hover {
+  color: var(--coral);
+}
+.ft__note {
+  width: 100%;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+/* --- reveal -------------------------------------------------------------
+   Nothing here may be the only reason text is visible. Copy is visible by
+   default; main.js adds `.anim` to <html> only once GSAP has actually loaded,
+   and only then does anything start hidden. CDN down, JS blocked, script
+   error — the page still reads.
+   ---------------------------------------------------------------------- */
+
+.anim .rise {
+  opacity: 0;
+  transform: translateY(26px);
+}
+.anim .rise.is-in {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.8s ease,
+    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Headline stagger is pure CSS — no tween to stall, no JS to fail. */
+.word {
+  display: inline-block;
+  animation: word-in 0.85s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  animation-delay: calc(var(--i, 0) * 0.06s + 0.12s);
+}
+@keyframes word-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5em) rotate(3deg);
+  }
+}
+
+/* --- legal pages -------------------------------------------------------- */
+
+.legal {
+  padding-top: 128px;
+  padding-bottom: 96px;
+  max-width: 760px;
+}
+.legal h1 {
+  font-size: clamp(2.3rem, 5.6vw, 3.4rem);
+  margin-bottom: 14px;
+}
+.legal__meta {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  padding-bottom: 30px;
+  margin-bottom: 40px;
+  border-bottom: 1px solid var(--line);
+}
+.legal h2 {
+  font-size: 1.5rem;
+  margin: 52px 0 14px;
+}
+.legal h3 {
+  font-size: 1.05rem;
+  margin: 30px 0 8px;
+}
+.legal p,
+.legal li {
+  color: color-mix(in srgb, var(--ink) 86%, var(--bg));
+  margin-bottom: 14px;
+}
+.legal ul {
+  padding-left: 22px;
+  margin: 0 0 18px;
+}
+.legal li {
+  margin-bottom: 8px;
+}
+.legal a {
+  color: var(--coral);
+  text-underline-offset: 3px;
+}
+.legal strong {
+  color: var(--ink);
+}
+.legal table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0 24px;
+  font-size: 0.94rem;
+}
+.legal th,
+.legal td {
+  text-align: left;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+.legal th {
+  font-family: var(--body);
+  font-weight: 700;
+  background: var(--alt);
+}
+.legal .callout {
+  background: var(--alt);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--coral);
+  border-radius: 14px;
+  padding: 18px 20px;
+  margin: 26px 0;
+}
+.legal .callout p:last-child {
+  margin-bottom: 0;
+}
+
+/* --- responsive --------------------------------------------------------- */
+
+@media (max-width: 1040px) {
+  .hero__in,
+  .strict__in {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .hero .dial {
+    order: -1;
+  }
+  .story__in {
+    grid-template-columns: 1fr;
+  }
+  /* Sticky phone is a desktop affordance. On small screens it sits inline,
+     once, on the session beat — see main.js `desktop`. */
+  .rail {
+    position: static;
+    height: auto;
+    padding-block: 6vh;
+  }
+  .act {
+    min-height: 0;
+    padding-block: 5vh;
+  }
+  .grid-apps {
+    max-width: 400px;
+  }
+}
+
+@media (max-width: 560px) {
+  body {
+    font-size: 16px;
+  }
+  .phone {
+    --pw: 268px;
+  }
+  .dial .ghost {
+    --gs: 0.7;
+  }
+  /* Full-width only for the page's own CTA stacks — a blanket rule on .btn also
+     hit the header button and pushed the whole layout sideways. */
+  .hero__cta .btn,
+  .close__cta .btn {
+    width: 100%;
+  }
+  .hero__cta,
+  .close__cta {
+    flex-direction: column;
+  }
+  .feat .card {
+    width: 280px;
+    padding: 22px;
+  }
+  .cast .card {
+    width: 172px;
+  }
+  .cast__art {
+    height: 132px;
+  }
+  .cast .card .ghost {
+    --gs: 0.4;
+  }
+  .cast__art img {
+    max-height: 118px;
+  }
+  .grid-apps {
+    gap: 12px;
+    padding: 18px;
+    border-radius: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001s !important;
+  }
+  /* Hold the sprite on its first frame rather than flashing one cycle. */
+  .ghost {
+    animation: none !important;
+    background-position: 0% 0% !important;
+  }
+  .anim .rise,
+  .word {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
