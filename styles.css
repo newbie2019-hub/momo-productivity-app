@@ -1694,8 +1694,20 @@ p {
     min-height: 0;
     padding-block: 5vh;
   }
+  /* Both of these were sized for the desktop side-column. Once the layout
+     stacks they get the full content width, so the caps just stranded them in a
+     sea of empty space — let them use the room they now have. */
   .grid-apps {
-    max-width: 400px;
+    max-width: none;
+  }
+  .tile__ico {
+    max-width: 104px;
+  }
+  .cal {
+    max-width: none;
+    /* Capped per cell rather than per row: 7 free-growing columns across a
+       tablet-width container would render 130px calendar squares. */
+    grid-template-columns: repeat(7, minmax(0, 104px));
   }
   /* Heading before the calendar once the two columns stack — the grid's source
      order puts the calendar first, which reads as an orphan on a phone. */
@@ -1732,6 +1744,13 @@ p {
   }
   .legal {
     padding-top: 104px;
+  }
+  /* True phone width: let the week fill the column edge to edge. */
+  .cal {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+  .tile__ico {
+    max-width: 78px;
   }
   .legal table {
     font-size: 0.88rem;
