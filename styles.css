@@ -419,14 +419,37 @@ p {
 .hero h1 {
   margin-bottom: 26px;
 }
+/* The left column: a warm bloom behind the headline balances the dial's glow on
+   the right, so the composition isn't lit on one side only. */
+.hero__copy {
+  position: relative;
+  isolation: isolate;
+}
+.hero__copy::before {
+  content: '';
+  position: absolute;
+  left: -14%;
+  top: -22%;
+  width: 78%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--coral) 15%, transparent),
+    transparent 68%
+  );
+  z-index: -1;
+  pointer-events: none;
+}
+
 .pre {
   display: block;
-  font-size: 0.4em;
+  font-size: 0.47em;
   font-weight: 500;
-  line-height: 1.15;
-  letter-spacing: 0;
-  color: var(--muted);
-  margin-bottom: 0.12em;
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  color: color-mix(in srgb, var(--ink) 72%, var(--bg));
+  margin-bottom: 0.06em;
 }
 
 /* The changing word is the product's whole idea, so the type says it. */
@@ -436,6 +459,7 @@ p {
   color: var(--coral);
 }
 .cycler > span {
+  position: relative;
   grid-area: 1 / 1;
   opacity: 0;
   transform: translateY(0.42em) rotate(2deg);
@@ -446,6 +470,24 @@ p {
 .cycler > span.is-on {
   opacity: 1;
   transform: none;
+}
+.cycler > span.is-on::after {
+  content: '';
+  position: absolute;
+  left: 0.04em;
+  right: 0.04em;
+  bottom: 0.07em;
+  height: 0.075em;
+  border-radius: var(--r-pill);
+  background: currentColor;
+  opacity: 0.42;
+  transform-origin: 0 50%;
+  animation: word-rule 0.6s cubic-bezier(0.2, 1, 0.3, 1) 0.14s both;
+}
+@keyframes word-rule {
+  from {
+    transform: scaleX(0);
+  }
 }
 
 .hero__cta {
@@ -459,23 +501,43 @@ p {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin: 26px 0 0;
+  margin: 28px 0 0;
   padding: 0;
   list-style: none;
+  max-width: 52ch;
 }
 .facts li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-family: var(--mono);
-  font-size: 0.74rem;
-  letter-spacing: 0.04em;
+  font-size: 0.735rem;
+  letter-spacing: 0.03em;
   color: var(--muted);
   border: 1px solid var(--line);
-  background: color-mix(in srgb, var(--surface) 60%, transparent);
+  background: color-mix(in srgb, var(--surface) 55%, transparent);
   border-radius: var(--r-pill);
-  padding: 6px 13px;
+  padding: 7px 14px;
+  transition:
+    border-color 0.25s ease,
+    color 0.25s ease;
+}
+.facts li:hover {
+  border-color: color-mix(in srgb, var(--coral) 40%, var(--line));
+  color: var(--ink);
 }
 .facts li b {
   color: var(--coral);
   font-weight: 500;
+}
+/* Platform qualifier, so "Strict Mode" doesn't need a footnote elsewhere. */
+.facts li span {
+  font-size: 0.64rem;
+  letter-spacing: 0.04em;
+  color: var(--coral);
+  border: 1px solid color-mix(in srgb, var(--coral) 34%, transparent);
+  border-radius: var(--r-pill);
+  padding: 1px 6px;
 }
 
 .hero__note {
