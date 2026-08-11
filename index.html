@@ -405,8 +405,94 @@
     </div>
   </section>
 
+  <!-- ===================== multiplayer ===================== -->
+  <!-- The room, told as one round: the shared 3-2-1, the ring while it runs, and
+       the scoreboard that keeps everyone — including whoever walked out. -->
+  <section class="sec" id="together">
+    <div class="wrap room__in">
+      <div>
+        <p class="stamp">Two to five people</p>
+        <h2 class="rise">Start together.<br />Finish together.</h2>
+        <p class="lede rise">
+          Open a room, share the six-letter code, and nobody starts until everyone has marked
+          themselves ready. Then the same 3&#8239;·&#8239;2&#8239;·&#8239;1 counts down on every
+          phone at once — the clock runs off one server timestamp, so you are genuinely in the same
+          session rather than four sessions that happen to overlap.
+        </p>
+        <ul class="facts rise">
+          <li><b>Focus</b> — one shared timer</li>
+          <li><b>Survival</b> — no timer, last one focusing wins</li>
+          <li>Leave the app, you're out</li>
+          <li>Rooms of <b>2–5</b></li>
+        </ul>
+        <p class="hero__note rise">
+          Give up and the others keep going. Your buddy droops where everyone can see it.
+        </p>
+      </div>
+
+      <div class="room" id="room" aria-hidden="true">
+        <div class="room__bar">
+          <span class="room__code">ABC123</span>
+          <span class="room__live"><i></i>4 focusing</span>
+        </div>
+
+        <!-- You: the ring, exactly as the app draws it — buddy inside, clock in the lower arc. -->
+        <div class="room__me">
+          <svg class="ring" viewBox="0 0 120 120" aria-hidden="true">
+            <circle class="ring__track" cx="60" cy="60" r="54" />
+            <circle class="ring__fill" cx="60" cy="60" r="54" />
+          </svg>
+          <div class="ghost ghost--default" data-state="idle"></div>
+          <span class="room__t">18:24</span>
+        </div>
+
+        <!-- Everyone else, underneath — where the app puts them. -->
+        <div class="faces room__peers">
+          <div class="face">
+            <div><div class="ghost ghost--mint" data-state="idle"></div></div>
+            <b>Mika</b><small>Focusing</small>
+          </div>
+          <div class="face">
+            <div><div class="ghost ghost--ember" data-state="idle"></div></div>
+            <b>Dee</b><small>Focusing</small>
+          </div>
+          <div class="face is-out">
+            <div><div class="ghost ghost--shadow" data-state="sad"></div></div>
+            <b>Kojo</b><small class="bad">Out 4:12</small>
+          </div>
+        </div>
+
+        <!-- The shared countdown, over the top of it, once per scroll-in. -->
+        <div class="room__count" id="roomCount"><span>3</span></div>
+      </div>
+    </div>
+
+    <!-- The scoreboard keeps everyone. Walking out mid-round doesn't delete you from it. -->
+    <div class="wrap board__wrap">
+      <div class="board rise">
+        <p class="board__hd">Session complete <span>3 of 4 finished</span></p>
+        <div class="board__row">
+          <div class="ghost ghost--default" data-state="idle" aria-hidden="true"></div>
+          <b>You</b><span class="ok">Completed 25:00</span><em>+50 xp</em>
+        </div>
+        <div class="board__row">
+          <div class="ghost ghost--mint" data-state="idle" aria-hidden="true"></div>
+          <b>Mika</b><span class="ok">Completed 25:00</span><em>+50 xp</em>
+        </div>
+        <div class="board__row">
+          <div class="ghost ghost--ember" data-state="idle" aria-hidden="true"></div>
+          <b>Dee</b><span class="ok">Completed 25:00</span><em>+50 xp</em>
+        </div>
+        <div class="board__row is-out">
+          <div class="ghost ghost--shadow" data-state="sad" aria-hidden="true"></div>
+          <b>Kojo</b><span class="bad">Left early 4:12</span><em>—</em>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ===================== the cast ===================== -->
-  <section class="sec shelf cast" id="cast" data-lenis-prevent>
+  <section class="sec shelf cast" id="cast" data-lenis-prevent-touch>
     <div class="wrap sec__head">
       <p class="stamp">Between sessions</p>
       <h2 class="rise">Spend the coins on the cast.</h2>
@@ -436,6 +522,13 @@
         </div>
         <p class="card__name">Shadow</p>
         <span class="card__cost">◎ 500</span>
+      </div>
+      <div class="card">
+        <div class="cast__art">
+          <div class="ghost ghost--ember" data-state="idle" aria-hidden="true"></div>
+        </div>
+        <p class="card__name">Ember</p>
+        <span class="card__cost">◎ 600</span>
       </div>
       <div class="card">
         <div class="cast__art">
@@ -490,11 +583,64 @@
     </div>
   </section>
 
+  <!-- ===================== stats ===================== -->
+  <!-- The numbers screen: totals, the solo/together split, and the real heatmap
+       shape — by hour bucket down, by day across, same as the app's Stats tab. -->
+  <section class="sec" id="stats">
+    <div class="wrap sec__head">
+      <p class="stamp">Afterwards</p>
+      <h2 class="rise">Where the hours actually went.</h2>
+      <p class="lede rise">
+        Every finished session — alone or in a room — lands in the same place. No goals to set, no
+        targets to miss: just what you did, by hour and by day, in your own timezone.
+      </p>
+    </div>
+
+    <div class="wrap stats__in">
+      <div class="statgrid rise" aria-hidden="true">
+        <div class="stat">
+          <b>42h 10m</b><small>focused</small>
+        </div>
+        <div class="stat">
+          <b>168</b><small>sessions</small>
+        </div>
+        <div class="stat">
+          <b>3h 05m</b><small>best day</small>
+        </div>
+        <div class="stat stat--streak">
+          <b>12</b><small>day streak</small>
+        </div>
+        <div class="stat stat--split">
+          <span class="split">
+            <i class="split__solo" style="--w: 72%"></i><i class="split__duo" style="--w: 28%"></i>
+          </span>
+          <span class="split__k"><em class="k-solo"></em>121 on your own</span>
+          <span class="split__k"><em class="k-duo"></em>47 with friends</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <p class="panel__hd">When you focus</p>
+        <div class="heatwrap">
+          <div class="heat" data-heat></div>
+          <div class="heat__ax" aria-hidden="true">
+            <span>6a</span><span>10a</span><span>2p</span><span>6p</span><span>10p</span>
+          </div>
+        </div>
+        <div class="legend" aria-hidden="true">
+          <span>less</span>
+          <i style="--v: 20"></i><i style="--v: 45"></i><i style="--v: 70"></i><i style="--v: 100"></i>
+          <span>more</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ===================== feature shelf ===================== -->
-  <section class="sec shelf feat" id="more" data-lenis-prevent>
+  <section class="sec shelf feat" id="more" data-lenis-prevent-touch>
     <div class="wrap sec__head">
       <p class="stamp">The rest of it</p>
-      <h2 class="rise">Seven things worth knowing.</h2>
+      <h2 class="rise">Five things worth knowing.</h2>
       <p class="lede rise">Drag, or just keep scrolling.</p>
     </div>
     <div class="belt" id="featBelt">
@@ -531,18 +677,6 @@
 
       <article class="card">
         <div class="feat__art">
-          <div class="heat" id="heat"></div>
-        </div>
-        <div class="feat__ico"><svg viewBox="0 0 24 24"><use href="#i-chart" /></svg></div>
-        <h3>Your actual pattern</h3>
-        <p>
-          A heatmap of when you really focus, by hour and by weekday, built from your own sessions in
-          your own timezone.
-        </p>
-      </article>
-
-      <article class="card">
-        <div class="feat__art">
           <div class="badges">
             <img src="assets/img/badge-early-bird.webp" alt="Early bird badge" />
             <img src="assets/img/badge-first-focus.webp" alt="First focus badge" />
@@ -554,31 +688,6 @@
         <p>
           Early mornings, flawless runs, a full deck of characters. They arrive quietly, without a
           popup parade.
-        </p>
-      </article>
-
-      <article class="card">
-        <div class="feat__art">
-          <div class="faces">
-            <div class="face">
-              <div><div class="ghost ghost--default" data-state="busy" aria-hidden="true"></div></div>
-              <b>Yvan</b><small>Focusing</small>
-            </div>
-            <div class="face">
-              <div><div class="ghost ghost--mint" data-state="busy" aria-hidden="true"></div></div>
-              <b>Mika</b><small>Focusing</small>
-            </div>
-            <div class="face">
-              <div><div class="ghost ghost--shadow" data-state="idle" aria-hidden="true"></div></div>
-              <b>Sam</b><small class="off">Online</small>
-            </div>
-          </div>
-        </div>
-        <div class="feat__ico"><svg viewBox="0 0 24 24"><use href="#i-users" /></svg></div>
-        <h3>Focus together</h3>
-        <p>
-          Open a co-focus room and everyone's buddy works in the same space, live. The leaderboard
-          ranks XP earned, not hours logged.
         </p>
       </article>
 

@@ -388,22 +388,25 @@ if (!HAS_GSAP) {
     });
   })();
 
-  /* --- stats heatmap in the feature shelf ------------------------------ */
-  (() => {
-    const heat = $('#heat');
-    if (!heat) return;
-    // A plausible week: quiet mornings, a strong mid-morning block, an evening dip.
-    const shape = [8, 22, 46, 74, 88, 62, 30, 18, 34, 58, 44, 16];
+  /* --- stats heatmap ---------------------------------------------------- */
+  // Every [data-heat] gets filled, so the grid can appear in more than one place.
+  $$('[data-heat]').forEach((heat) => {
+    // A plausible week. `shape` is the day's arc across the 12 two-hour buckets — quiet early,
+    // a strong mid-morning block, an afternoon second wind, nothing late. `days` weights each row,
+    // so the grid has real hot and cold spots (Mon-Thu carry it, the weekend barely registers)
+    // instead of averaging into one flat brown wash.
+    const shape = [6, 18, 52, 88, 96, 64, 28, 22, 46, 72, 38, 10];
+    const days = [1, 0.92, 1.05, 0.78, 0.62, 0.22, 0.34];
     const cells = [];
-    for (let row = 0; row < 5; row++) {
-      shape.forEach((v) => {
+    days.forEach((w, row) => {
+      shape.forEach((v, col) => {
         const i = document.createElement('i');
-        const jitter = ((row * 7 + v) % 11) * 3;
-        i.style.setProperty('--v', Math.max(6, Math.min(100, v - row * 6 + jitter)));
+        const jitter = (((row * 7 + col * 5) % 9) - 4) * 4;
+        i.style.setProperty('--v', Math.max(4, Math.min(100, Math.round(v * w + jitter))));
         heat.append(i);
         cells.push(i);
       });
-    }
+    });
     if (REDUCED) return;
     // Sweep left-to-right so it reads as a day filling in, not a grid appearing.
     gsap.from(cells, {
@@ -413,6 +416,40 @@ if (!HAS_GSAP) {
       ease: 'back.out(2)',
       stagger: { each: 0.008, from: 'start' },
       scrollTrigger: { trigger: heat, start: 'top 92%', once: true },
+    });
+  });
+
+  /* --- the room's shared 3-2-1 ------------------------------------------
+     The app counts every player in off one server timestamp, so the panel opens
+     the same way: the countdown sits over it, plays once when it scrolls into
+     view, then gets out of the way of the running room underneath.
+     -------------------------------------------------------------------- */
+  (() => {
+    const count = $('#roomCount');
+    const room = $('#room');
+    if (!count || !room) return;
+    const digit = $('span', count);
+    // Reduced motion gets the running room directly — no beat to miss.
+    if (REDUCED) return count.setAttribute('hidden', '');
+
+    ScrollTrigger.create({
+      trigger: room,
+      start: 'top 78%',
+      once: true,
+      onEnter: () => {
+        let n = 3;
+        digit.textContent = n;
+        const tick = setInterval(() => {
+          n -= 1;
+          if (n > 0) {
+            digit.textContent = n;
+            if (!REDUCED) gsap.fromTo(digit, { scale: 0.6 }, { scale: 1, duration: 0.4, ease: 'back.out(3)' });
+            return;
+          }
+          clearInterval(tick);
+          count.classList.add('is-done');
+        }, 800);
+      },
     });
   })();
 

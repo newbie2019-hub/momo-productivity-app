@@ -333,20 +333,27 @@ p {
   }
 }
 
+/* Frame sizes are each sheet's own — the four sheets don't match, exactly as in
+   the app's SPRITES registry. Regenerate with scripts/sprites.py after new art. */
 .ghost--default {
   --sheet: url('assets/sprites/ghost.webp');
-  --fw: 240px;
-  --fh: 248px;
+  --fw: 255px;
+  --fh: 249px;
 }
 .ghost--mint {
   --sheet: url('assets/sprites/ghost-mint.webp');
-  --fw: 200px;
-  --fh: 309px;
+  --fw: 217px;
+  --fh: 252px;
+}
+.ghost--ember {
+  --sheet: url('assets/sprites/ghost-ember.webp');
+  --fw: 178px;
+  --fh: 241px;
 }
 .ghost--shadow {
   --sheet: url('assets/sprites/ghost-shadow.webp');
-  --fw: 185px;
-  --fh: 305px;
+  --fw: 227px;
+  --fh: 224px;
 }
 
 /* Only `idle` art shipped with the app, so the other states are expressed with
@@ -1646,11 +1653,385 @@ p {
 
 /* --- responsive --------------------------------------------------------- */
 
+/* --- the room (multiplayer) ---------------------------------------------
+   Copy left, a live room panel right. The panel rebuilds the app's running
+   screen with the same parts the app uses: your buddy inside a progress ring,
+   everyone else in a row underneath.
+   ---------------------------------------------------------------------- */
+
+.room__in {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: clamp(32px, 6vw, 84px);
+  align-items: center;
+}
+.room {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-md);
+  padding: 20px 20px 24px;
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  overflow: hidden;
+}
+.room__bar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.room__code {
+  font-family: var(--mono);
+  font-size: 0.86rem;
+  letter-spacing: 3px;
+  color: var(--coral);
+  background: var(--coral-soft);
+  border-radius: var(--r-pill);
+  padding: 4px 12px;
+}
+.room__live {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+.room__live i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--sage);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--sage) 60%, transparent);
+  animation: room-pulse 2.2s ease-out infinite;
+}
+@keyframes room-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--sage) 60%, transparent);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 9px transparent;
+  }
+}
+
+/* Ring + buddy + clock, stacked in one square — the app's own composition. */
+.room__me {
+  position: relative;
+  width: 230px;
+  height: 230px;
+  display: grid;
+  place-items: center;
+}
+.ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.ring__track,
+.ring__fill {
+  fill: none;
+  stroke-width: 7;
+  stroke-linecap: round;
+}
+.ring__track {
+  stroke: var(--coral-soft);
+}
+.ring__fill {
+  stroke: var(--coral);
+  /* r=54 → 2πr ≈ 339.3. Drawn as one dash whose offset is the remaining arc. */
+  stroke-dasharray: 339.3;
+  stroke-dashoffset: 130;
+}
+.anim .ring__fill {
+  animation: ring-fill 14s linear infinite;
+}
+@keyframes ring-fill {
+  from {
+    stroke-dashoffset: 339.3;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.room__me .ghost {
+  --gs: 0.46;
+  transform: translateY(-10px);
+}
+.room__t {
+  position: absolute;
+  bottom: 14px;
+  font-family: var(--display);
+  font-size: 1.4rem;
+  font-variant-numeric: tabular-nums;
+}
+.room__peers {
+  justify-content: center;
+}
+.room__peers .face > div {
+  height: 66px;
+}
+.room__peers .face .ghost {
+  --gs: 0.2;
+}
+.face.is-out {
+  opacity: 0.45;
+}
+.face small.bad {
+  color: var(--rose);
+}
+
+/* The shared 3-2-1, laid over the panel and gone once it has played. */
+.room__count {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  backdrop-filter: blur(2px);
+  font-family: var(--display);
+  font-size: 5.5rem;
+  line-height: 1;
+  color: var(--ink);
+  transition:
+    opacity 0.45s ease,
+    visibility 0.45s;
+}
+.room__count[hidden] {
+  display: none;
+}
+.room__count.is-done {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* --- the scoreboard ----------------------------------------------------- */
+
+.board__wrap {
+  margin-top: clamp(28px, 4vw, 44px);
+}
+.board {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-sm);
+  padding: 18px clamp(16px, 3vw, 26px) 22px;
+  max-width: 620px;
+}
+.board__hd {
+  font-family: var(--display);
+  font-size: 1.05rem;
+  margin: 0 0 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+.board__hd span {
+  font-family: var(--body);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+.board__row {
+  display: grid;
+  grid-template-columns: 46px 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
+}
+.board__row > div:first-child {
+  height: 42px;
+  display: grid;
+  place-items: end center;
+}
+.board__row .ghost {
+  --gs: 0.16;
+}
+.board__row b {
+  font-family: var(--display);
+  font-size: 0.98rem;
+}
+.board__row span {
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+.board__row em {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-style: normal;
+  min-width: 54px;
+  text-align: right;
+}
+.board__row .ok {
+  color: var(--sage);
+}
+.board__row .bad {
+  color: var(--rose);
+}
+.board__row.is-out {
+  opacity: 0.6;
+}
+
+/* --- stats -------------------------------------------------------------- */
+
+.stats__in {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 620px);
+  gap: clamp(24px, 4vw, 48px);
+  align-items: start;
+}
+.statgrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.stat {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-chip);
+  padding: 16px 18px;
+  display: grid;
+  gap: 2px;
+}
+.stat b {
+  font-family: var(--display);
+  font-size: 1.5rem;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.stat small {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.stat--streak b {
+  color: var(--gold);
+}
+.stat--split {
+  grid-column: 1 / -1;
+  gap: 8px;
+}
+.split {
+  display: flex;
+  height: 10px;
+  border-radius: var(--r-pill);
+  overflow: hidden;
+  background: var(--alt);
+}
+.split i {
+  width: var(--w);
+}
+.split__solo {
+  background: var(--coral);
+}
+.split__duo {
+  background: var(--sage);
+}
+.split__k {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+.split__k em {
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+  display: inline-block;
+}
+.k-solo {
+  background: var(--coral);
+}
+.k-duo {
+  background: var(--sage);
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-sm);
+  padding: 18px 20px 20px;
+}
+.panel__hd {
+  font-family: var(--display);
+  font-size: 1.05rem;
+  margin: 0 0 10px;
+}
+.heatwrap {
+  background: var(--well);
+  border-radius: var(--r-chip);
+  padding: 4px 0 10px;
+}
+/* The section's own heatmap sits in a well, so it drops the card's inner padding. */
+.heatwrap .heat {
+  padding: 14px 14px 8px;
+  gap: 4px;
+}
+/* Wide-and-short cells, like the app's — a square grid at this width reads as swatches.
+   Cold cells mix toward --well, not --alt: against the panel the --alt end sits too close in
+   luminance to the hot end, and the whole grid flattens into one brown wash. */
+.heatwrap .heat i {
+  aspect-ratio: auto;
+  height: 24px;
+  background: color-mix(in srgb, var(--coral) calc(var(--v) * 1%), var(--well));
+}
+.heat__ax {
+  display: flex;
+  justify-content: space-between;
+  padding-inline: 16px;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  color: var(--muted);
+}
+.legend {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  padding-top: 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+.legend i {
+  width: 16px;
+  height: 12px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--coral) calc(var(--v) * 1%), var(--alt));
+}
+
 @media (max-width: 1040px) {
   .hero__in,
-  .strict__in {
+  .strict__in,
+  .room__in,
+  .stats__in {
     grid-template-columns: 1fr;
     gap: 28px;
+  }
+  /* The room panel leads on a phone — the picture explains the copy. */
+  .room {
+    order: -1;
+  }
+  .room__me {
+    width: min(230px, 64vw);
+    height: min(230px, 64vw);
+  }
+  .room__me .ghost {
+    --gs: 0.42;
   }
   /* One viewport is a desktop luxury. On a phone, forcing it pushed the download
      button clean below the fold, so the hero is content-height instead and the
@@ -1739,6 +2120,20 @@ p {
 }
 
 @media (max-width: 560px) {
+  .board__row {
+    grid-template-columns: 40px 1fr auto;
+    gap: 10px;
+  }
+  .board__row em {
+    display: none;
+  }
+  .statgrid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .stat b {
+    font-size: 1.28rem;
+  }
+
   body {
     font-size: 16px;
   }
