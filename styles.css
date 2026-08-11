@@ -658,9 +658,93 @@ p {
   }
 }
 
+/* Pre-start: a scrim over the ring, a button where the clock will be, and the
+   3-2-1 in the middle once it's pressed. Three states, all on .dial. */
+.dial__scrim,
+.dial__start,
+.dial__count {
+  position: absolute;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.4s ease,
+    visibility 0.4s;
+}
+.dial[data-state='idle'] .dial__scrim,
+.dial[data-state='count'] .dial__scrim,
+.dial[data-state='idle'] .dial__start,
+.dial[data-state='count'] .dial__count {
+  opacity: 1;
+  visibility: visible;
+}
+.dial__scrim {
+  inset: 5%;
+  border-radius: 50%;
+  z-index: 2;
+  background: color-mix(in srgb, var(--bg) 50%, transparent);
+  backdrop-filter: blur(1.2px);
+}
+.dial__start {
+  z-index: 3;
+  bottom: 11%;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 20px 12px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--coral);
+  color: #33251d;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: 0 12px 30px -14px var(--coral);
+  transition:
+    opacity 0.4s ease,
+    visibility 0.4s,
+    transform 0.25s ease;
+}
+.dial__start svg {
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+}
+.dial__start:hover {
+  transform: translateY(-2px);
+}
+.dial__start:active {
+  transform: translateY(0);
+}
+.dial__count {
+  z-index: 3;
+  margin: 0;
+  font-family: var(--display);
+  font-size: clamp(3.6rem, 9vw, 5.6rem);
+  line-height: 1;
+  color: var(--ink);
+}
+/* The digit is replaced on every beat, which is what restarts this. */
+.dial__count span {
+  display: inline-block;
+  animation: count-pop 0.6s cubic-bezier(0.2, 1.4, 0.35, 1);
+}
+@keyframes count-pop {
+  from {
+    transform: scale(0.55);
+    opacity: 0.2;
+  }
+}
+/* The button owns the clock's spot before the clock has anything to say. */
+.dial[data-state='idle'] .dial__time,
+.dial[data-state='count'] .dial__time {
+  opacity: 0;
+}
+
 .dial__time {
   position: absolute;
   bottom: 13%; /* inside the ring, clear of both the stroke and the buddy */
+  transition: opacity 0.35s ease;
   font-family: var(--mono);
   font-size: 0.9rem;
   font-weight: 500;
@@ -718,13 +802,19 @@ p {
 .acts {
   display: flex;
   flex-direction: column;
+  /* The rail is sticky inside its grid row, and the row is only as tall as this
+     column — so without a tail the phone starts sliding away while the last act
+     is still arriving. This keeps it pinned until that copy has had its turn. */
+  padding-bottom: 30vh;
 }
 .act {
-  min-height: 84vh;
+  /* Tall enough that each beat gets its own scroll moment, short enough that the
+     centred copy doesn't leave half a screen of empty room around it. */
+  min-height: 52vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding-block: 6vh;
+  padding-block: 4vh;
 }
 .act h2 {
   margin-bottom: 18px;
@@ -1654,27 +1744,15 @@ p {
 /* --- responsive --------------------------------------------------------- */
 
 /* --- the room (multiplayer) ---------------------------------------------
-   Copy left, a live room panel right. The panel rebuilds the app's running
-   screen with the same parts the app uses: your buddy inside a progress ring,
-   everyone else in a row underneath.
+   A screen inside the phone, like every other beat of the story: your buddy in
+   a progress ring, everyone else in a row underneath, the shared 3-2-1 over the
+   top of it.
    ---------------------------------------------------------------------- */
 
-.room__in {
-  display: grid;
-  grid-template-columns: 1fr 400px;
-  gap: clamp(32px, 6vw, 84px);
+.screen--room {
   align-items: center;
-}
-.room {
-  position: relative;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--r-card);
-  box-shadow: var(--shadow-md);
-  padding: 20px 20px 24px;
-  display: grid;
-  justify-items: center;
-  gap: 14px;
+  justify-content: center;
+  gap: 12px;
   overflow: hidden;
 }
 .room__bar {
@@ -1722,8 +1800,8 @@ p {
 /* Ring + buddy + clock, stacked in one square — the app's own composition. */
 .room__me {
   position: relative;
-  width: 230px;
-  height: 230px;
+  width: min(230px, 100%);
+  aspect-ratio: 1;
   display: grid;
   place-items: center;
 }
@@ -1809,76 +1887,6 @@ p {
 .room__count.is-done {
   opacity: 0;
   visibility: hidden;
-}
-
-/* --- the scoreboard ----------------------------------------------------- */
-
-.board__wrap {
-  margin-top: clamp(28px, 4vw, 44px);
-}
-.board {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--r-card);
-  box-shadow: var(--shadow-sm);
-  padding: 18px clamp(16px, 3vw, 26px) 22px;
-  max-width: 620px;
-}
-.board__hd {
-  font-family: var(--display);
-  font-size: 1.05rem;
-  margin: 0 0 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 12px;
-}
-.board__hd span {
-  font-family: var(--body);
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--muted);
-}
-.board__row {
-  display: grid;
-  grid-template-columns: 46px 1fr auto auto;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 0;
-  border-top: 1px solid var(--line);
-}
-.board__row > div:first-child {
-  height: 42px;
-  display: grid;
-  place-items: end center;
-}
-.board__row .ghost {
-  --gs: 0.16;
-}
-.board__row b {
-  font-family: var(--display);
-  font-size: 0.98rem;
-}
-.board__row span {
-  font-size: 0.82rem;
-  font-weight: 700;
-}
-.board__row em {
-  font-family: var(--mono);
-  font-size: 0.78rem;
-  color: var(--muted);
-  font-style: normal;
-  min-width: 54px;
-  text-align: right;
-}
-.board__row .ok {
-  color: var(--sage);
-}
-.board__row .bad {
-  color: var(--rose);
-}
-.board__row.is-out {
-  opacity: 0.6;
 }
 
 /* --- stats -------------------------------------------------------------- */
@@ -2017,21 +2025,9 @@ p {
 @media (max-width: 1040px) {
   .hero__in,
   .strict__in,
-  .room__in,
   .stats__in {
     grid-template-columns: 1fr;
     gap: 28px;
-  }
-  /* The room panel leads on a phone — the picture explains the copy. */
-  .room {
-    order: -1;
-  }
-  .room__me {
-    width: min(230px, 64vw);
-    height: min(230px, 64vw);
-  }
-  .room__me .ghost {
-    --gs: 0.42;
   }
   /* One viewport is a desktop luxury. On a phone, forcing it pushed the download
      button clean below the fold, so the hero is content-height instead and the
@@ -2070,6 +2066,10 @@ p {
     position: static;
     height: auto;
     padding-block: 6vh;
+  }
+  /* Nothing is pinned down here, so the tail would just be dead space. */
+  .acts {
+    padding-bottom: 0;
   }
   .act {
     min-height: 0;
@@ -2120,13 +2120,6 @@ p {
 }
 
 @media (max-width: 560px) {
-  .board__row {
-    grid-template-columns: 40px 1fr auto;
-    gap: 10px;
-  }
-  .board__row em {
-    display: none;
-  }
   .statgrid {
     grid-template-columns: 1fr 1fr;
   }

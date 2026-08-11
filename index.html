@@ -120,29 +120,23 @@
         <p class="stamp">00:00 — press start</p>
         <!-- The changing word is the product's whole idea, so it gets the size. -->
         <h1 id="h1">
-          <span class="pre">Focus with someone who</span>
-          <span class="cycler" id="cycler" aria-label="notices"></span>
+          <span class="pre">Focus doesn't have to be</span>
+          <span class="cycler" id="cycler" aria-label="boring"></span>
         </h1>
         <p class="lede rise">
-          A pomodoro timer with a small ghost living inside it. It works while you work, celebrates
-          when you finish, and quietly droops when you wander off.
+          It can be a game you actually want to win. Press start, stay put, and a small ghost works
+          the session out beside you — win it and you both level up. Walk out and it's a loss you can
+          see on its face.
         </p>
         <div class="hero__cta rise">
           <a class="btn btn--primary" href="#get">Download for iOS</a>
           <span class="btn btn--soon" aria-disabled="true">Android&nbsp;—&nbsp;</span>
         </div>
-        <!-- Four real capabilities. The "never bought" line used to be a fifth
-             paragraph competing with these; it belongs in the same list. -->
-        <ul class="facts" id="facts">
-          <li><b>1 · 5 · 15 · 25</b> min sessions</li>
-          <li>Lockscreen Live&nbsp;Activity</li>
-          <li>Strict Mode <span>iOS</span></li>
-          <li>Works offline</li>
-          <li>Characters earned, <b>never bought</b></li>
-        </ul>
       </div>
 
-      <div class="dial" id="dial">
+      <!-- The hero is a session you have to start. It sits in the app's pre-start
+           state until you press the button, takes the same 3-2-1, then runs. -->
+      <div class="dial" id="dial" data-state="idle">
         <div class="dial__glow"></div>
         <span class="spark"></span><span class="spark"></span><span class="spark"></span>
         <svg class="dial__ring" viewBox="0 0 120 120" aria-hidden="true">
@@ -156,6 +150,13 @@
           aria-label="Momo, a small round ghost, floating"
         ></div>
         <div class="dial__time" id="dialTime">25:00</div>
+
+        <div class="dial__scrim" aria-hidden="true"></div>
+        <button class="dial__start" id="dialStart" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.4l11.5 6.6L8 18.6z" /></svg>
+          Start focus
+        </button>
+        <p class="dial__count" id="dialCount" aria-hidden="true"><span>3</span></p>
       </div>
     </div>
     <div class="wrap">
@@ -266,6 +267,39 @@
                 <i class="tab is-on"></i><i class="tab"></i><i class="tab"></i><i class="tab"></i>
               </div>
             </div>
+
+            <!-- room: the same session, run with other people. Your buddy in the
+                 ring, everyone else underneath — the app's own composition. -->
+            <div class="screen screen--room" data-screen="room">
+              <div class="room__bar">
+                <span class="room__code">ABC123</span>
+                <span class="room__live"><i></i>4 focusing</span>
+              </div>
+              <div class="room__me">
+                <svg class="ring" viewBox="0 0 120 120" aria-hidden="true">
+                  <circle class="ring__track" cx="60" cy="60" r="54" />
+                  <circle class="ring__fill" cx="60" cy="60" r="54" />
+                </svg>
+                <div class="ghost ghost--default" data-state="busy" aria-hidden="true"></div>
+                <span class="room__t">18:24</span>
+              </div>
+              <div class="faces room__peers">
+                <div class="face">
+                  <div><div class="ghost ghost--mint" data-state="busy"></div></div>
+                  <b>Mika</b><small>Focusing</small>
+                </div>
+                <div class="face">
+                  <div><div class="ghost ghost--ember" data-state="busy"></div></div>
+                  <b>Dee</b><small>Focusing</small>
+                </div>
+                <div class="face is-out">
+                  <div><div class="ghost ghost--shadow" data-state="sad"></div></div>
+                  <b>Kojo</b><small class="bad">Out 4:12</small>
+                </div>
+              </div>
+              <!-- The shared countdown, over the screen, once per visit. -->
+              <div class="room__count" id="roomCount"><span>3</span></div>
+            </div>
           </div>
         </div>
       </div>
@@ -316,6 +350,23 @@
             XP, a level, and every so often a small pile of coins — rare enough that they actually
             feel earned.
           </p>
+        </article>
+
+        <article class="act" data-screen="room" data-island="on">
+          <p class="stamp">25:00 — together</p>
+          <h2 class="rise">Or run the whole thing<br />with two to five friends.</h2>
+          <p class="lede rise">
+            Open a room, share the six-letter code, and nobody starts until everyone has marked
+            themselves ready. Then the same 3&#8239;·&#8239;2&#8239;·&#8239;1 counts down on every
+            phone at once — the clock runs off one server timestamp, so you're genuinely in the same
+            session rather than four that happen to overlap. Give up and the others keep going,
+            while your buddy droops where everyone can see it.
+          </p>
+          <ul class="facts rise">
+            <li><b>Focus</b> — one shared timer</li>
+            <li><b>Survival</b> — no timer, last one focusing wins</li>
+            <li>Leave the app, you're out</li>
+          </ul>
         </article>
       </div>
     </div>
@@ -400,92 +451,6 @@
             <span class="tile__lock"><svg viewBox="0 0 24 24"><use href="#i-lock" /></svg></span>
           </span>
           <b>Mail</b>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===================== multiplayer ===================== -->
-  <!-- The room, told as one round: the shared 3-2-1, the ring while it runs, and
-       the scoreboard that keeps everyone — including whoever walked out. -->
-  <section class="sec" id="together">
-    <div class="wrap room__in">
-      <div>
-        <p class="stamp">Two to five people</p>
-        <h2 class="rise">Start together.<br />Finish together.</h2>
-        <p class="lede rise">
-          Open a room, share the six-letter code, and nobody starts until everyone has marked
-          themselves ready. Then the same 3&#8239;·&#8239;2&#8239;·&#8239;1 counts down on every
-          phone at once — the clock runs off one server timestamp, so you are genuinely in the same
-          session rather than four sessions that happen to overlap.
-        </p>
-        <ul class="facts rise">
-          <li><b>Focus</b> — one shared timer</li>
-          <li><b>Survival</b> — no timer, last one focusing wins</li>
-          <li>Leave the app, you're out</li>
-          <li>Rooms of <b>2–5</b></li>
-        </ul>
-        <p class="hero__note rise">
-          Give up and the others keep going. Your buddy droops where everyone can see it.
-        </p>
-      </div>
-
-      <div class="room" id="room" aria-hidden="true">
-        <div class="room__bar">
-          <span class="room__code">ABC123</span>
-          <span class="room__live"><i></i>4 focusing</span>
-        </div>
-
-        <!-- You: the ring, exactly as the app draws it — buddy inside, clock in the lower arc. -->
-        <div class="room__me">
-          <svg class="ring" viewBox="0 0 120 120" aria-hidden="true">
-            <circle class="ring__track" cx="60" cy="60" r="54" />
-            <circle class="ring__fill" cx="60" cy="60" r="54" />
-          </svg>
-          <div class="ghost ghost--default" data-state="idle"></div>
-          <span class="room__t">18:24</span>
-        </div>
-
-        <!-- Everyone else, underneath — where the app puts them. -->
-        <div class="faces room__peers">
-          <div class="face">
-            <div><div class="ghost ghost--mint" data-state="idle"></div></div>
-            <b>Mika</b><small>Focusing</small>
-          </div>
-          <div class="face">
-            <div><div class="ghost ghost--ember" data-state="idle"></div></div>
-            <b>Dee</b><small>Focusing</small>
-          </div>
-          <div class="face is-out">
-            <div><div class="ghost ghost--shadow" data-state="sad"></div></div>
-            <b>Kojo</b><small class="bad">Out 4:12</small>
-          </div>
-        </div>
-
-        <!-- The shared countdown, over the top of it, once per scroll-in. -->
-        <div class="room__count" id="roomCount"><span>3</span></div>
-      </div>
-    </div>
-
-    <!-- The scoreboard keeps everyone. Walking out mid-round doesn't delete you from it. -->
-    <div class="wrap board__wrap">
-      <div class="board rise">
-        <p class="board__hd">Session complete <span>3 of 4 finished</span></p>
-        <div class="board__row">
-          <div class="ghost ghost--default" data-state="idle" aria-hidden="true"></div>
-          <b>You</b><span class="ok">Completed 25:00</span><em>+50 xp</em>
-        </div>
-        <div class="board__row">
-          <div class="ghost ghost--mint" data-state="idle" aria-hidden="true"></div>
-          <b>Mika</b><span class="ok">Completed 25:00</span><em>+50 xp</em>
-        </div>
-        <div class="board__row">
-          <div class="ghost ghost--ember" data-state="idle" aria-hidden="true"></div>
-          <b>Dee</b><span class="ok">Completed 25:00</span><em>+50 xp</em>
-        </div>
-        <div class="board__row is-out">
-          <div class="ghost ghost--shadow" data-state="sad" aria-hidden="true"></div>
-          <b>Kojo</b><span class="bad">Left early 4:12</span><em>—</em>
         </div>
       </div>
     </div>

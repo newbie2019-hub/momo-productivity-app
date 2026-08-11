@@ -49,11 +49,11 @@ if (HAS_GSAP && !REDUCED && typeof Lenis !== 'undefined') {
   );
 }
 
-/* --- the buddy's vocabulary, said by the headline ----------------------- */
+/* --- the headline's punchline, one word at a time ----------------------- */
 (() => {
   const cycler = $('#cycler');
   if (!cycler) return;
-  const words = ['notices', 'waits', 'cheers', 'sulks'];
+  const words = ['boring', 'a grind', 'a chore', 'willpower'];
 
   words.forEach((w, i) => {
     const s = document.createElement('span');
@@ -94,33 +94,79 @@ if (HAS_GSAP && !REDUCED && typeof Lenis !== 'undefined') {
   pre.replaceChildren(...out);
 })();
 
-/* --- hero dial: a whole session, compressed to 30s ---------------------- */
+/* --- hero dial: a session you press start on ----------------------------
+   Nothing runs until you ask it to, because that's the product: pick a length,
+   press start, take the 3-2-1, then a whole 25-minute session compressed into
+   half a minute — celebration included, then back to the button for another go.
+   ---------------------------------------------------------------------- */
 (() => {
   const dial = $('#dial');
   const time = $('#dialTime');
+  const start = $('#dialStart');
+  const count = $('#dialCount');
   const ghost = dial && $('.ghost', dial);
-  if (!dial || REDUCED) return;
+  if (!dial || !start || !count) return;
 
   const RUN = 26;
   const CHEER = 4;
-  let t0 = null;
 
-  const frame = (now) => {
-    if (t0 === null) t0 = now;
-    const t = ((now - t0) / 1000) % (RUN + CHEER);
-    if (t < RUN) {
-      const p = t / RUN;
-      dial.style.setProperty('--p', p.toFixed(4));
-      time.textContent = mmss(1500 * (1 - p));
-      if (ghost.dataset.state !== 'busy') ghost.dataset.state = 'busy';
-    } else {
-      dial.style.setProperty('--p', '1');
-      time.textContent = 'done';
-      if (ghost.dataset.state !== 'celebrating') ghost.dataset.state = 'celebrating';
-    }
+  // Reduced motion gets a still dial mid-session — no countdown to miss, and no
+  // button promising something that won't move.
+  if (REDUCED) {
+    dial.dataset.state = 'run';
+    dial.style.setProperty('--p', '0.44');
+    time.textContent = '14:00';
+    start.remove();
+    return;
+  }
+
+  const idle = () => {
+    dial.dataset.state = 'idle';
+    dial.style.setProperty('--p', '0');
+    time.textContent = '25:00';
+    ghost.dataset.state = 'idle';
+  };
+
+  const run = () => {
+    dial.dataset.state = 'run';
+    let t0 = null;
+    const frame = (now) => {
+      if (t0 === null) t0 = now;
+      const t = (now - t0) / 1000;
+      if (t < RUN) {
+        const p = t / RUN;
+        dial.style.setProperty('--p', p.toFixed(4));
+        time.textContent = mmss(1500 * (1 - p));
+        if (ghost.dataset.state !== 'busy') ghost.dataset.state = 'busy';
+      } else if (t < RUN + CHEER) {
+        dial.style.setProperty('--p', '1');
+        time.textContent = 'done';
+        if (ghost.dataset.state !== 'celebrating') ghost.dataset.state = 'celebrating';
+      } else {
+        return idle();
+      }
+      requestAnimationFrame(frame);
+    };
     requestAnimationFrame(frame);
   };
-  requestAnimationFrame(frame);
+
+  start.addEventListener('click', () => {
+    dial.dataset.state = 'count';
+    // Replacing the digit is what restarts its pop — see .dial__count span.
+    let n = 3;
+    count.innerHTML = `<span>${n}</span>`;
+    const tick = setInterval(() => {
+      n -= 1;
+      if (n > 0) {
+        count.innerHTML = `<span>${n}</span>`;
+        return;
+      }
+      clearInterval(tick);
+      run();
+    }, 750);
+  });
+
+  idle();
 })();
 
 if (!HAS_GSAP) {
@@ -195,6 +241,28 @@ if (!HAS_GSAP) {
       );
     };
 
+    // The room opens the way the app does: the shared 3-2-1 sits over the screen,
+    // plays once, then gets out of the way of the running room underneath.
+    const count = $('#roomCount');
+    if (REDUCED) count?.setAttribute('hidden', '');
+    const runCount = () => {
+      if (!count || count.dataset.played) return;
+      count.dataset.played = '1';
+      const digit = $('span', count);
+      let n = 3;
+      digit.textContent = n;
+      const tick = setInterval(() => {
+        n -= 1;
+        if (n > 0) {
+          digit.textContent = n;
+          gsap.fromTo(digit, { scale: 0.6 }, { scale: 1, duration: 0.4, ease: 'back.out(3)' });
+          return;
+        }
+        clearInterval(tick);
+        count.classList.add('is-done');
+      }, 800);
+    };
+
     const popChips = () =>
       gsap.fromTo(
         $$('.screen[data-screen="home"] .chip', phone),
@@ -212,6 +280,7 @@ if (!HAS_GSAP) {
       // Rewards land as a count-up, the way they do in the app's results screen.
       if (name === 'results' && !REDUCED) countRewards();
       if (name === 'home' && !REDUCED) popChips();
+      if (name === 'room' && !REDUCED) runCount();
 
       // The grace period is the one number on this page that isn't scroll-driven:
       // it's a real 10-second countdown, because that's what it is in the app.
@@ -361,7 +430,6 @@ if (!HAS_GSAP) {
     });
   };
 
-  pop('#facts li', { trigger: '#facts', y: 10, stagger: 0.08, start: 'top 98%' });
   pop('.feat__ico', { stagger: 0.05, trigger: '#more' });
   pop('.cast .card', { trigger: '#cast', y: 22, scale: 0.95, stagger: 0.06 });
   pop('.feat .card', { trigger: '#more', y: 22, scale: 0.96, stagger: 0.06 });
@@ -418,40 +486,6 @@ if (!HAS_GSAP) {
       scrollTrigger: { trigger: heat, start: 'top 92%', once: true },
     });
   });
-
-  /* --- the room's shared 3-2-1 ------------------------------------------
-     The app counts every player in off one server timestamp, so the panel opens
-     the same way: the countdown sits over it, plays once when it scrolls into
-     view, then gets out of the way of the running room underneath.
-     -------------------------------------------------------------------- */
-  (() => {
-    const count = $('#roomCount');
-    const room = $('#room');
-    if (!count || !room) return;
-    const digit = $('span', count);
-    // Reduced motion gets the running room directly — no beat to miss.
-    if (REDUCED) return count.setAttribute('hidden', '');
-
-    ScrollTrigger.create({
-      trigger: room,
-      start: 'top 78%',
-      once: true,
-      onEnter: () => {
-        let n = 3;
-        digit.textContent = n;
-        const tick = setInterval(() => {
-          n -= 1;
-          if (n > 0) {
-            digit.textContent = n;
-            if (!REDUCED) gsap.fromTo(digit, { scale: 0.6 }, { scale: 1, duration: 0.4, ease: 'back.out(3)' });
-            return;
-          }
-          clearInterval(tick);
-          count.classList.add('is-done');
-        }, 800);
-      },
-    });
-  })();
 
   /* --- one small pointer flourish, nothing more ------------------------ */
   if (!REDUCED && matchMedia('(hover: hover)').matches) {
