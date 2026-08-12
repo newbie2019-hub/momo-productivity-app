@@ -684,9 +684,10 @@ p {
   background: color-mix(in srgb, var(--bg) 50%, transparent);
   backdrop-filter: blur(1.2px);
 }
+/* No insets: the dial's own `place-items: center` puts it dead centre, where the
+   3-2-1 lands the moment it's pressed. */
 .dial__start {
   z-index: 3;
-  bottom: 11%;
   display: inline-flex;
   align-items: center;
   gap: 9px;
