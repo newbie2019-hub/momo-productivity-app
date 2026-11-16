@@ -3,11 +3,10 @@
 Marketing site for **Momo: Pomodoro Gamified**, plus the two legal pages the App
 Store requires.
 
-Static HTML, CSS and one JS file. No build step, no npm, nothing to install.
+Static HTML, CSS and plain ES modules. No build step, no npm, nothing to install.
 
 ```
-open index.html                # works straight from disk
-python3 -m http.server 8899    # or serve it, to exercise the /privacy paths
+python3 -m http.server 8899    # serve it: ES modules and the .glb models need http, not file://
 ```
 
 ## Pages
@@ -36,47 +35,96 @@ They're written to match what the app actually does — the data in
 Mode app selections never leave the device — but **have a lawyer read them.** Not
 legal advice.
 
-Also swap the two `#get` anchors in `index.html` for the real App Store URL once
-you have one.
+Once the App Store listing exists, add a download button next to the waitlist forms.
 
 ## The design
 
-Palette and type come from the app's own system (`momo/docs/design.md`,
-`src/constants/theme.ts`) — the site commits to the app's **dark** theme so it
-reads as the same product. One structural idea carries the page: **the whole site
-is one 25-minute session.** Scroll progress is the clock, which is why the header
-counter, the hero dial, the phone's timer, the lockscreen Live Activity and the
-Dynamic Island all show the same number, and why section eyebrows are timestamps
-(`00:00`, `08:30`, `25:00`) rather than `01 / 02 / 03`.
+The app's dark theme (`momo/src/constants/theme.ts`): one warm dark ground, one
+accent (Momo's coral #FF9585 to blush #FF5F6D) and one warm neutral (cream #F6EDE4
+plus a muted warm grey). No other colours in the UI: buddy colours appear only on
+the 3D buddies and their own rings. The backdrop is a single fixed `.ambient` layer
+of very soft coral glows with a faint film grain, so sections never show a seam.
 
-Third-party JS is two CDN files: GSAP + ScrollTrigger, and Lenis for smooth
-scrolling. Both are progressive enhancement — `main.js` only adds the `.anim`
-class that allows CSS to hide anything *after* it confirms GSAP loaded, so a
-blocked CDN degrades to a static, fully readable page. `prefers-reduced-motion`
-disables Lenis entirely and pins the sprites to a single frame.
+The pitch leads with Strict Mode and the game loop (coins, streaks, achievements,
+leaderboards, focus rooms); buddies support it. Only Momo and Mint are shown as
+buddies, with Aqua as a teaser behind frosted glass and in the story's quit beat.
+Never call the characters "ghosts" in copy: they are buddies, Momo is the main one.
+No pricing or coin costs anywhere on the page.
 
-### The ghost is real app art
+Third-party JS, all from CDNs with pinned versions: Lenis + GSAP 3.13/ScrollTrigger
+(classic scripts), three 0.187 + cannon-es 0.20 (importmap in `index.html`), and the
+Firebase JS SDK 11.10 (loaded by `js/waitlist.js` on first use).
 
-`assets/sprites/*.webp` are the app's actual sprite sheets: 6×6 grids of 36
-frames at 12fps. Two stepped CSS keyframes walk the grid — no JS, no canvas.
+| File | Does |
+| --- | --- |
+| `main.js` | Lenis, reveals, the DOM half of every scene, and `window.momoStory` (scroll progress of "How it works") |
+| `js/stage.js` | Every live 3D buddy, through one WebGL canvas |
+| `js/waitlist.js`, `js/firebase-config.js` | The two waitlist forms |
+| `js/vendor-momo/` | **Generated** copies of the app's three.js code; do not edit |
 
-Two things to know if you touch it:
+`main.js` only adds `.anim` (which lets CSS hide things before they reveal) once
+GSAP has loaded, so a blocked CDN leaves a plain, readable page.
+`prefers-reduced-motion` turns off Lenis, the sticky story (its steps just stack),
+and holds the 3D on still frames.
 
-- The timing function must be `steps(6, jump-none)`. Plain `steps(6)` is
-  `jump-end`, which lands on 0/16.7/33.3/…/83.3% and never reaches the last
-  frame, so every position falls between two frames and you get two half-ghosts.
-- Scale sprites with `--gs` (which drives `width`/`height`), never
-  `transform: scale()`. A transform shrinks the paint but leaves a full-size
-  layout box, which pushes characters out of their cards — and `transform` is
-  already used by the per-state animations.
+## 3D buddies
 
-Only the `idle` sheets shipped with the app, so `busy` / `sad` / `celebrating`
-are expressed as transforms on the idle loop.
+One fixed `<canvas id="gl">` over the page, under the header, with pointer events
+off. Each `[data-view]` element (hero, story, lab, join) and each small
+`[data-buddy]` slot (roster, leaderboard, focus room, teaser) is a window: every
+frame the renderer draws that view's scene into the element's rectangle with a
+viewport + scissor. Views are built when they come within ~900px of the screen, and
+the loop stops whenever no view is visible. DPR is capped at 1.75. There are no
+static character images: while loading, and without WebGL, a slot shows a soft glow.
+
+After drawing, one full-screen pass raises each pixel's alpha to its brightest
+channel. The additive glows write colour but no alpha; Chrome composites that as
+light, Firefox does not (it showed the ring as a grey disc). Keep that pass.
+
+The import map must stay above the first `modulepreload`/module script: Firefox and
+Safari ignore an import map that arrives after a module load (bare `three` then
+fails and no 3D shows).
+
+`stage.js` drives the buddies the way `momo/scripts/render-clip.mjs` does: same
+lights, camera, clip sequencing, flatness from the `Collapse*` morph targets, floor
+shadow, tilt-when-flat, and `ring.update(now, tapAt, progress, 1, cast, 1 - flat)`.
+
+**The app code** lives in `js/vendor-momo/`: `momo-ring`, `momo-effects` (`addLook`,
+used here for Aqua), `momo-dome` (the Strict Mode shield) and
+`momo-coins` (rigid-body coins via cannon-es). Regenerate after the app changes:
+
+```
+node scripts/vendor-momo.mjs     # Node 24+, expects the app repo at ../momo
+```
+
+**The models** in `assets/models/` are trimmed copies of the app's GLBs, meshopt
+compressed (decoded by three's `MeshoptDecoder`) with positions and morph targets
+left as floats. Quantizing them (gltfpack, `gltf-transform meshopt`) breaks the
+`Collapse*` morphs on the GPU: the collapsed body lands off its ring. Draco mangles
+morph targets too.
+
+| File | From | Clips kept | Size |
+| --- | --- | --- | --- |
+| `ghost.glb` | `ghost/ghost.glb` (Momo, Aqua) | Idle, IdleBlink, IdleLook, Focus, Celebrate, IdleBounce, Happy, Failed, DeflatedIdle, Reinflate, Greeting, Wave | 2.2 MB |
+| `mint.glb` | `ghost_mint/mint.glb` | Idle, IdleBlink, IdleBounce, Happy, Celebrate, Failed, DeflatedIdle, Reinflate | 2.2 MB |
+
+The unused `Prop*` meshes are dropped too. `scripts/trim-model.mjs` does it all
+(see its header). `ghost.glb` loads up front; `mint.glb` when the page reaches it.
+
+## Waitlist
+
+`setDoc(doc(db, 'waitlist', email), { email, createdAt: serverTimestamp(), source: 'site' })`
+with `email` trimmed and lowercased. The Firestore rule allows create only, with
+exactly those keys and `email` equal to the doc id, so a second signup with the same
+email comes back `permission-denied`, which the form shows as "already on the list".
+App Check (reCAPTCHA Enterprise) is enforced; the site key is in
+`js/firebase-config.js` and only works on the domains registered for it. A filled
+honeypot pretends to succeed and writes nothing.
 
 ## The Strict Mode app grid
 
-The tiles are **category icons, not brand logos** — a blue chat app, a red video
-app, a pink photos app. They read as a home screen at a glance without naming
+The tiles are **category icons, not brand logos**: neutral squircles with a
+chat, video or photos glyph. They read as a home screen at a glance without naming
 anyone.
 
 That's deliberate. Reproducing real marks (Instagram, TikTok, YouTube…) is a
@@ -90,33 +138,8 @@ brand-asset kit — drop the SVGs in and swap the `<use href="#i-…">` for an
 animation all keep working. Check each platform's brand guidelines first, several
 explicitly forbid showing their mark altered or disparaged.
 
-## Device mockups
-
-The screens inside the phone frame are rebuilt in CSS from the app's real design
-tokens, so they stay crisp at any size, animate, and can't drift out of date
-silently the way a stale PNG does.
-
-To use real captures instead, replace a `.screen` div with an image — the frame,
-radii, shadow and Dynamic Island keep working:
-
-```html
-<div class="screen is-on" data-screen="home">
-  <img src="assets/screens/13-home.png" alt="" style="width:100%;height:100%;object-fit:cover" />
-</div>
-```
-
-Capture them with the flow in the app repo:
-
-```bash
-cd ../momo && scripts/screens/run.sh --no-rc   # writes docs/screens/captures/
-```
-
-`assets/screens/onboarding-raw.png` is one such capture, kept for reference.
-
 ## Assets
 
-Everything under `assets/` is derived from the app repo (`momo/assets/`) and
-re-encoded for the web — the hero sprite sheet goes from 4.3 MB PNG to 203 KB
-WebP. To regenerate after new art lands, resize with `sips` and encode with
-`cwebp`; sprite sheets must be scaled by an exact integer divisor so frame
-boundaries stay on whole pixels.
+Everything under `assets/` derives from the app repo (`momo/assets/`), re-encoded
+for the web: `img/badge-*.webp` are the app's achievement art
+(`momo/assets/badges/`) at 256px. Encode new art with `cwebp`.

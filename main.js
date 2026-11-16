@@ -1,510 +1,228 @@
-/* ===========================================================================
-   Momo — site behaviour. Lenis + GSAP/ScrollTrigger from CDN.
+/* Momo site: scrolling, reveals and the DOM half of every scene. The 3D half is js/stage.js,
+   which reads window.momoStory (written here) for the scroll-driven story.
 
-   Two ideas hold the page together:
-   1. The whole page is one 25-minute session. Scroll progress IS the clock, so
-      the header, the hero dial, the phone's timer and the Dynamic Island all
-      read from it.
-   2. The buddy reacts. Each act declares the screen, and the island state, that
-      it wants; the sticky phone follows along.
-   =========================================================================== */
+   Progressive enhancement: everything reads fine without GSAP. Only once GSAP is confirmed do we
+   add .anim to <html>, which is what lets CSS hide things before they reveal. */
+(() => {
+  const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const gsap = window.gsap;
+  const ST = window.ScrollTrigger;
+  const smooth = 'power3.out';
 
-const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const desktop = matchMedia('(min-width: 1041px)');
-const $ = (s, r = document) => r.querySelector(s);
-const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-const HAS_GSAP = typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined';
+  // ---------------------------------------------------------------- the story's state (also for stage.js)
+  // Four beats over the sticky section; hits = when, inside beat 1, each app bounces off the shield.
+  const story = (window.momoStory = { p: 0, beat: 0, local: 0, hits: [0.3, 0.45, 0.6, 0.75] });
+  const how = $('#how');
+  const steps = $$('.step');
+  const dots = $$('.dots i');
+  const hudTime = $('#hudTime');
+  const hudLabel = $('#hudLabel');
+  const hudReward = $('#hudReward');
+  const hudFail = $('#hudFail');
+  const hudStreak = $('#hudStreak');
+  const apps = $$('#hudApps .app');
+  const stageEl = $('.how__stage');
+  let beat = -1;
+  const mmss = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+  function storyUpdate() {
+    if (!how) return;
+    const r = how.getBoundingClientRect();
+    const p = Math.min(1, Math.max(0, -r.top / Math.max(1, r.height - innerHeight)));
+    story.p = p;
+    story.beat = Math.min(3, Math.floor(p * 4));
+    story.local = p * 4 - story.beat;
+    if (story.beat !== beat) {
+      beat = story.beat;
+      steps.forEach((s, i) => s.classList.toggle('is-on', i === beat));
+      dots.forEach((d, i) => d.classList.toggle('is-on', i === beat));
+      if (gsap) {
+        gsap.to(hudReward, { autoAlpha: beat === 3 ? 1 : 0, y: beat === 3 ? 0 : 16, duration: 0.6, ease: smooth });
+        gsap.to(hudFail, { autoAlpha: beat === 2 ? 1 : 0, y: beat === 2 ? 0 : 16, duration: 0.6, ease: smooth });
+      }
+      hudStreak.textContent = beat === 3 ? '8' : '7';
+    }
+    // The clock: 25 minutes across the session, stopped where the buddy quit.
+    const done = beat === 3 ? 1 : beat === 2 ? 0.58 : (p / 0.5) * 0.7;
+    hudTime.textContent = beat === 3 && story.local > 0.3 ? '00:00' : mmss(25 * 60 * (1 - Math.min(1, done)));
+    hudLabel.textContent = ['focusing', 'shield up', 'quit at 10:30', 'complete'][beat];
+    hudTime.parentElement.style.color = beat === 2 ? 'var(--peach)' : beat === 3 ? 'var(--coral)' : '';
+    // Beat 1: apps fly at the buddy and bounce off the shield.
+    // Each one flies in (k 0..0.6), meets the shield, and is knocked back out (0.6..1).
+    const far = Math.min(stageEl.clientWidth, 560) * 0.6;
+    apps.forEach((a, i) => {
+      const k = beat === 1 ? (story.local - story.hits[i] + 0.18) / 0.3 : -1;
+      if (k <= 0 || k >= 1) return void (a.style.opacity = 0);
+      const ang = (i / apps.length) * Math.PI * 2 + 0.5;
+      const incoming = k < 0.6;
+      const d = incoming ? far * (1 - (k / 0.6) ** 2 * 0.62) : far * (0.38 + ((k - 0.6) / 0.4) * 0.7);
+      a.style.opacity = incoming ? Math.min(1, k * 5) : 1 - (k - 0.6) / 0.4;
+      a.style.transform = `translate(${Math.cos(ang) * d}px, ${Math.sin(ang) * d * 0.55}px) rotate(${incoming ? 0 : (k - 0.6) * 60}deg)`;
+    });
+  }
 
-// Only now may CSS hide anything: if the CDN failed, the page stays fully readable.
-if (HAS_GSAP && !REDUCED) document.documentElement.classList.add('anim');
-
-const mmss = (sec) => {
-  const s = Math.max(0, Math.round(sec));
-  return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
-};
-
-/* --- smooth scrolling ----------------------------------------------------
-   Lenis drives the scroll and ScrollTrigger reads from it, so scrubbed
-   animations stay locked to the eased position instead of the raw one. Both are
-   skipped entirely under reduced motion — native scrolling is the honest
-   fallback, and hijacking it is exactly what that setting asks you not to do.
-   ---------------------------------------------------------------------- */
-let lenis = null;
-if (HAS_GSAP && !REDUCED && typeof Lenis !== 'undefined') {
-  lenis = new Lenis({ duration: 1.05, wheelMultiplier: 0.9, touchMultiplier: 1.6 });
-  lenis.on('scroll', ScrollTrigger.update);
-  gsap.ticker.add((t) => lenis.raf(t * 1000));
-  // GSAP freezes tweens when a frame takes too long; that stalls reveals on slow
-  // devices (and inside headless screenshots). We drive the ticker ourselves.
-  gsap.ticker.lagSmoothing(0);
-
-  // In-page links have to go through Lenis or they fight it.
-  $$('a[href^="#"]').forEach((a) =>
-    a.addEventListener('click', (e) => {
-      const target = $(a.getAttribute('href'));
-      if (!target) return;
-      e.preventDefault();
-      lenis.scrollTo(target, { offset: -70 });
+  // ---------------------------------------------------------------- buddies lab (DOM half)
+  const SAY = {
+    ghost: ['Momo, the one you start with.', 'Momo deflates like a sad balloon.'],
+    ghost_mint: ['Mint: a calm sprout with a leaf on top.', 'Mint wilts into a heap.'],
+  };
+  const say = $('#labSay');
+  let pick = 'ghost';
+  $$('.buddy').forEach((btn) =>
+    btn.addEventListener('click', () => {
+      $$('.buddy').forEach((b) => {
+        b.classList.toggle('is-on', b === btn);
+        b.setAttribute('aria-checked', String(b === btn));
+      });
+      pick = btn.dataset.id;
+      say.textContent = SAY[pick][0];
+      document.dispatchEvent(new CustomEvent('buddy:select', { detail: { id: pick } }));
     }),
   );
-}
+  $$('[data-act]').forEach((btn) =>
+    btn.addEventListener('click', () => {
+      const act = btn.dataset.act;
+      say.textContent = act === 'quit' ? `${SAY[pick][1]} Tap it to bring it back.` : 'Session complete. Coins earned!';
+      document.dispatchEvent(new CustomEvent('buddy:act', { detail: { act } }));
+    }),
+  );
 
-/* --- the headline's punchline, one word at a time ----------------------- */
-(() => {
-  const cycler = $('#cycler');
-  if (!cycler) return;
-  const words = ['boring', 'a grind', 'a chore', 'willpower'];
-
-  words.forEach((w, i) => {
-    const s = document.createElement('span');
-    s.textContent = w;
-    s.setAttribute('aria-hidden', 'true');
-    if (i === 0) s.className = 'is-on';
-    cycler.append(s);
+  $('[data-view=lab]')?.addEventListener('click', () => {
+    if (say.textContent.includes('Tap it')) say.textContent = 'Back on its feet. ' + SAY[pick][0];
   });
-  if (REDUCED) return;
 
-  let i = 0;
-  const spans = [...cycler.children];
-  setInterval(() => {
-    spans[i].classList.remove('is-on');
-    i = (i + 1) % spans.length;
-    spans[i].classList.add('is-on');
-    cycler.setAttribute('aria-label', words[i]);
-  }, 2400);
-})();
+  // ---------------------------------------------------------------- streak chain
+  const chain = $('#chain');
+  for (let i = 0; i < 14; i++) chain.appendChild(document.createElement('i'));
+  const links = $$('i', chain);
+  const streakN = $('#streakN');
+  const setStreak = (n) => {
+    links.forEach((l, i) => l.classList.toggle('is-lit', i < n));
+    streakN.textContent = n;
+  };
 
-/* --- headline: split into words for the CSS stagger --------------------- */
-(() => {
-  const pre = $('#h1 .pre');
-  if (!pre) return;
-  const out = [];
-  let n = 0;
-  [...pre.childNodes].forEach((node) => {
-    if (node.nodeType !== 3) return out.push(node);
-    node.textContent.split(/(\s+)/).forEach((chunk) => {
-      if (!chunk.trim()) return out.push(document.createTextNode(' '));
-      const s = document.createElement('span');
-      s.className = 'word';
-      s.style.setProperty('--i', n++); // CSS reads --i for its delay
-      s.textContent = chunk;
-      out.push(s);
-    });
-  });
-  pre.replaceChildren(...out);
-})();
+  // ---------------------------------------------------------------- the room's shared clock
+  const roomTime = $('#roomTime');
+  let roomS = 18 * 60 + 24;
+  if (!RM) setInterval(() => (roomTime.textContent = mmss((roomS = roomS > 0 ? roomS - 1 : 25 * 60))), 1000);
 
-/* --- hero dial: a session you press start on ----------------------------
-   Nothing runs until you ask it to, because that's the product: pick a length,
-   press start, take the 3-2-1, then a whole 25-minute session compressed into
-   half a minute — celebration included, then back to the button for another go.
-   ---------------------------------------------------------------------- */
-(() => {
-  const dial = $('#dial');
-  const time = $('#dialTime');
-  const start = $('#dialStart');
-  const count = $('#dialCount');
-  const ghost = dial && $('.ghost', dial);
-  if (!dial || !start || !count) return;
+  // ---------------------------------------------------------------- header
+  // The wordmark folds away after a little scroll (CSS transition), leaving the icon.
+  const hdr = $('#hdr');
+  const onScroll = () => {
+    hdr.classList.toggle('is-stuck', scrollY > 8);
+    hdr.classList.toggle('is-compact', scrollY > 80);
+    storyUpdate();
+  };
 
-  const RUN = 26;
-  const CHEER = 4;
-
-  // Reduced motion gets a still dial mid-session — no countdown to miss, and no
-  // button promising something that won't move.
-  if (REDUCED) {
-    dial.dataset.state = 'run';
-    dial.style.setProperty('--p', '0.44');
-    time.textContent = '14:00';
-    start.remove();
+  if (!gsap || !ST || RM) {
+    // Static page: every step and state shown plainly.
+    setStreak(12);
+    $('#appGrid')?.classList.add('is-locked');
+    $$('.tile__lock').forEach((l) => (l.style.opacity = 1));
+    addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
     return;
   }
 
-  const idle = () => {
-    dial.dataset.state = 'idle';
-    dial.style.setProperty('--p', '0');
-    time.textContent = '25:00';
-    ghost.dataset.state = 'idle';
-  };
+  // ================================================================= motion from here on
+  document.documentElement.classList.add('anim');
+  gsap.registerPlugin(ST);
 
-  const run = () => {
-    dial.dataset.state = 'run';
-    let t0 = null;
-    const frame = (now) => {
-      if (t0 === null) t0 = now;
-      const t = (now - t0) / 1000;
-      if (t < RUN) {
-        const p = t / RUN;
-        dial.style.setProperty('--p', p.toFixed(4));
-        time.textContent = mmss(1500 * (1 - p));
-        if (ghost.dataset.state !== 'busy') ghost.dataset.state = 'busy';
-      } else if (t < RUN + CHEER) {
-        dial.style.setProperty('--p', '1');
-        time.textContent = 'done';
-        if (ghost.dataset.state !== 'celebrating') ghost.dataset.state = 'celebrating';
-      } else {
-        return idle();
-      }
-      requestAnimationFrame(frame);
-    };
-    requestAnimationFrame(frame);
-  };
-
-  start.addEventListener('click', () => {
-    dial.dataset.state = 'count';
-    // Replacing the digit is what restarts its pop — see .dial__count span.
-    let n = 3;
-    count.innerHTML = `<span>${n}</span>`;
-    const tick = setInterval(() => {
-      n -= 1;
-      if (n > 0) {
-        count.innerHTML = `<span>${n}</span>`;
-        return;
-      }
-      clearInterval(tick);
-      run();
-    }, 750);
-  });
-
-  idle();
-})();
-
-if (!HAS_GSAP) {
-  // Nothing below can run without ScrollTrigger, and everything below is
-  // enhancement. Bail out rather than throwing halfway through.
-  console.warn('[momo] GSAP unavailable — scroll animations disabled');
-} else {
-  /* --- reveals ----------------------------------------------------------- */
-  if (REDUCED) {
-    $$('.rise').forEach((el) => el.classList.add('is-in'));
-  } else {
-    $$('.rise').forEach((el) =>
-      ScrollTrigger.create({
-        trigger: el,
-        start: 'top 90%',
-        once: true,
-        onEnter: () => el.classList.add('is-in'),
+  const lenis = window.Lenis ? new window.Lenis({ lerp: 0.1, smoothWheel: true }) : null;
+  if (lenis) {
+    window.__lenis = lenis;
+    lenis.on('scroll', ST.update);
+    gsap.ticker.add((t) => lenis.raf(t * 1000));
+    gsap.ticker.lagSmoothing(0);
+    // In-page links glide instead of jumping.
+    $$('a[href^="#"]').forEach((a) =>
+      a.addEventListener('click', (e) => {
+        const target = $(a.getAttribute('href'));
+        if (!target) return;
+        e.preventDefault();
+        lenis.scrollTo(target, { offset: a.getAttribute('href') === '#how' ? 0 : -72, duration: 1.4 });
       }),
     );
   }
+  gsap.ticker.add(onScroll);
 
-  /* --- header: the page's clock and progress ---------------------------- */
-  (() => {
-    const bar = $('#bar');
-    const clock = $('#clock');
-    const hdr = $('#hdr');
-    const outs = [$('#scTimer'), $('#notchTime'), $('#laTime')].filter(Boolean);
-    const tracks = [$('#scTrack'), $('#notchBar'), $('#laTrack')].filter(Boolean);
-
-    const paint = (p) => {
-      bar.style.setProperty('--p', p.toFixed(4));
-      // Countdown, not percentage — the site is a session, so it speaks in minutes.
-      const left = 1500 * (1 - p);
-      clock.textContent = `${mmss(left)} left`;
-      outs.forEach((el) => (el.textContent = mmss(left)));
-      tracks.forEach((el) => el.style.setProperty('--p', p.toFixed(4)));
-      hdr.classList.toggle('is-stuck', p > 0.005);
-    };
-
-    ScrollTrigger.create({ start: 0, end: 'max', onUpdate: (self) => paint(self.progress) });
-    paint(0);
-  })();
-
-  /* --- the story: acts drive the phone ---------------------------------- */
-  (() => {
-    const acts = $('#acts');
-    const rail = $('.rail');
-    const phone = $('#phone');
-    if (!acts || !phone) return;
-
-    const screens = $$('.screen', phone);
-    const notchTime = $('#notchTime');
-    let graceTimer = null;
-
-    const countRewards = () => {
-      $$('.reward b', phone).forEach((el, i) => {
-        const to = parseFloat(el.textContent.replace('+', ''));
-        const plus = el.textContent.trim().startsWith('+');
-        const o = { v: 0 };
-        gsap.to(o, {
-          v: to,
-          duration: 0.9,
-          delay: 0.18 + i * 0.12,
-          ease: 'power2.out',
-          onUpdate: () => (el.textContent = (plus ? '+' : '') + Math.round(o.v)),
-        });
-      });
-      gsap.fromTo(
-        $$('.reward', phone),
-        { scale: 0.86, opacity: 0 },
-        { scale: 1, opacity: 1, duration: 0.5, stagger: 0.1, ease: 'back.out(2.2)' },
-      );
-    };
-
-    // The room opens the way the app does: the shared 3-2-1 sits over the screen,
-    // plays once, then gets out of the way of the running room underneath.
-    const count = $('#roomCount');
-    if (REDUCED) count?.setAttribute('hidden', '');
-    const runCount = () => {
-      if (!count || count.dataset.played) return;
-      count.dataset.played = '1';
-      const digit = $('span', count);
-      let n = 3;
-      digit.textContent = n;
-      const tick = setInterval(() => {
-        n -= 1;
-        if (n > 0) {
-          digit.textContent = n;
-          gsap.fromTo(digit, { scale: 0.6 }, { scale: 1, duration: 0.4, ease: 'back.out(3)' });
-          return;
-        }
-        clearInterval(tick);
-        count.classList.add('is-done');
-      }, 800);
-    };
-
-    const popChips = () =>
-      gsap.fromTo(
-        $$('.screen[data-screen="home"] .chip', phone),
-        { scale: 0.7, opacity: 0 },
-        { scale: 1, opacity: 1, duration: 0.45, stagger: 0.08, ease: 'back.out(2.4)' },
-      );
-
-    const show = (act) => {
-      const name = act.dataset.screen;
-      screens.forEach((s) => s.classList.toggle('is-on', s.dataset.screen === name));
-
-      const island = act.dataset.island || 'off';
-      phone.dataset.island = island;
-
-      // Rewards land as a count-up, the way they do in the app's results screen.
-      if (name === 'results' && !REDUCED) countRewards();
-      if (name === 'home' && !REDUCED) popChips();
-      if (name === 'room' && !REDUCED) runCount();
-
-      // The grace period is the one number on this page that isn't scroll-driven:
-      // it's a real 10-second countdown, because that's what it is in the app.
-      clearInterval(graceTimer);
-      if (island === 'grace' && notchTime && !REDUCED) {
-        let n = 10;
-        notchTime.textContent = `⚠ ${n}`;
-        graceTimer = setInterval(() => {
-          n -= 1;
-          notchTime.textContent = `⚠ ${Math.max(0, n)}`;
-          if (n <= 0) clearInterval(graceTimer);
-        }, 1000);
-      }
-    };
-
-    const build = () => {
-      if (desktop.matches) {
-        if (rail.parentElement === acts) acts.before(rail); // phone sits left
-        $$('.act', acts).forEach((act) =>
-          ScrollTrigger.create({
-            trigger: act,
-            start: 'top 60%',
-            end: 'bottom 40%',
-            id: 'act',
-            onToggle: (self) => self.isActive && show(act),
-          }),
-        );
-      } else {
-        // No sticky on small screens: drop the phone inline after the second beat
-        // and hold it on the session screen — the most representative single view.
-        const anchor = $$('.act', acts)[1];
-        if (anchor && rail.parentElement !== acts) anchor.after(rail);
-        show(acts.children[1] || acts.children[0]);
-      }
-    };
-
-    build();
-    desktop.addEventListener('change', () => {
-      ScrollTrigger.getById('act') && ScrollTrigger.getAll().forEach((t) => t.vars.id === 'act' && t.kill());
-      build();
-      ScrollTrigger.refresh();
-    });
-  })();
-
-  /* --- horizontal shelves ----------------------------------------------
-     Desktop only. On touch the shelves are native overflow-x with snap points
-     (see styles.css) — dragging a carousel with the vertical scrollbar is a
-     mouse idiom and fights a swipe. gsap.matchMedia reverts the tween and its
-     inline transform automatically when the query stops matching, which is why
-     the native scroll isn't left fighting a leftover `x`.
-     -------------------------------------------------------------------- */
-  if (!REDUCED) {
-    gsap.matchMedia().add('(min-width: 1041px)', () => {
-      const tweens = [
-        ['#castBelt', '#cast'],
-        ['#featBelt', '#more'],
-      ].map(([beltSel, secSel]) => {
-        const belt = $(beltSel);
-        const sec = $(secSel);
-        if (!belt || !sec) return null;
-        return gsap.to(belt, {
-          x: () => -Math.max(0, belt.scrollWidth - window.innerWidth + 40),
-          ease: 'none',
-          scrollTrigger: {
-            trigger: sec,
-            start: 'top bottom',
-            end: 'bottom top',
-            scrub: 0.6,
-            invalidateOnRefresh: true,
-          },
-        });
-      });
-      return () => tweens.forEach((t) => t && t.scrollTrigger?.kill());
-    });
-  }
-
-  /* --- strict mode: the apps go dark ----------------------------------- */
-  (() => {
-    const grid = $('#blockGrid');
-    if (!grid) return;
-    const tiles = $$('.tile:not([data-momo])', grid);
-    const momo = $('.tile--momo', grid);
-
-    ScrollTrigger.create({
-      trigger: grid,
-      start: 'top 72%',
-      onEnter: () => {
-        momo?.classList.add('is-lit');
-        // Staggered by hand rather than tweened: the tiles animate themselves in
-        // CSS, this only decides when each one gives up.
-        tiles.forEach((t, i) => setTimeout(() => t.classList.add('is-blocked'), 120 + i * 110));
-      },
-      // Reset on the way back up so the beat replays on a second pass.
-      onLeaveBack: () => {
-        momo?.classList.remove('is-lit');
-        tiles.forEach((t) => t.classList.remove('is-blocked'));
-      },
-    });
-  })();
-
-  /* --- streak calendar -------------------------------------------------- */
-  (() => {
-    const cal = $('#cal');
-    if (!cal) return;
-    const missed = new Set([3, 9, 16]);
-    // Cells start empty and take their colour one at a time, so you watch the
-    // chain build rather than finding it already built.
-    const cells = Array.from({ length: 28 }, (_, i) => {
-      const el = document.createElement('i');
-      el.dataset.k = i === 27 ? 'today' : missed.has(i) ? '' : 'on';
-      cal.append(el);
-      return el;
-    });
-
-    if (REDUCED) {
-      cells.forEach((el) => el.dataset.k && el.classList.add(el.dataset.k));
-      return;
-    }
-    ScrollTrigger.create({
-      trigger: cal,
-      start: 'top 86%',
-      once: true,
-      onEnter: () =>
-        cells.forEach((el, i) =>
-          gsap.delayedCall(i * 0.035, () => {
-            if (el.dataset.k) el.classList.add(el.dataset.k);
-            gsap.fromTo(el, { scale: 0.55 }, { scale: 1, duration: 0.5, ease: 'back.out(2.6)' });
-          }),
-        ),
-    });
-  })();
-
-  /* --- micro: small staggered entrances --------------------------------- */
-  // One helper, used wherever a group of small things should arrive in sequence
-  // rather than all at once. Deliberately restrained: a short travel, one ease.
-  const pop = (sel, opts = {}) => {
-    const els = $$(sel);
-    if (!els.length || REDUCED) return;
-    gsap.from(els, {
-      opacity: 0,
-      y: opts.y ?? 14,
-      scale: opts.scale ?? 0.9,
-      duration: 0.55,
-      ease: 'back.out(1.8)',
-      stagger: opts.stagger ?? 0.07,
-      scrollTrigger: { trigger: opts.trigger || els[0], start: opts.start || 'top 90%', once: true },
-    });
-  };
-
-  pop('.feat__ico', { stagger: 0.05, trigger: '#more' });
-  pop('.cast .card', { trigger: '#cast', y: 22, scale: 0.95, stagger: 0.06 });
-  pop('.feat .card', { trigger: '#more', y: 22, scale: 0.96, stagger: 0.06 });
-  pop('.badges img', { trigger: '#more', stagger: 0.09 });
-
-  // The Strict Mode card's little week strip fills like the calendar does.
-  (() => {
-    const strip = $('#lockStrip');
-    if (!strip || REDUCED) return;
-    const bars = $$('i', strip);
-    const keep = bars.map((b) => b.className);
-    bars.forEach((b) => (b.className = ''));
-    ScrollTrigger.create({
-      trigger: strip,
-      start: 'top 92%',
-      once: true,
-      onEnter: () =>
-        bars.forEach((b, i) =>
-          gsap.delayedCall(i * 0.1, () => {
-            b.className = keep[i];
-            gsap.fromTo(b, { scaleY: 0.5 }, { scaleY: 1, duration: 0.4, ease: 'back.out(3)' });
-          }),
-        ),
-    });
-  })();
-
-  /* --- stats heatmap ---------------------------------------------------- */
-  // Every [data-heat] gets filled, so the grid can appear in more than one place.
-  $$('[data-heat]').forEach((heat) => {
-    // A plausible week. `shape` is the day's arc across the 12 two-hour buckets — quiet early,
-    // a strong mid-morning block, an afternoon second wind, nothing late. `days` weights each row,
-    // so the grid has real hot and cold spots (Mon-Thu carry it, the weekend barely registers)
-    // instead of averaging into one flat brown wash.
-    const shape = [6, 18, 52, 88, 96, 64, 28, 22, 46, 72, 38, 10];
-    const days = [1, 0.92, 1.05, 0.78, 0.62, 0.22, 0.34];
-    const cells = [];
-    days.forEach((w, row) => {
-      shape.forEach((v, col) => {
-        const i = document.createElement('i');
-        const jitter = (((row * 7 + col * 5) % 9) - 4) * 4;
-        i.style.setProperty('--v', Math.max(4, Math.min(100, Math.round(v * w + jitter))));
-        heat.append(i);
-        cells.push(i);
-      });
-    });
-    if (REDUCED) return;
-    // Sweep left-to-right so it reads as a day filling in, not a grid appearing.
-    gsap.from(cells, {
-      opacity: 0,
-      scale: 0.4,
-      duration: 0.4,
-      ease: 'back.out(2)',
-      stagger: { each: 0.008, from: 'start' },
-      scrollTrigger: { trigger: heat, start: 'top 92%', once: true },
-    });
+  // Reveal-on-scroll for anything marked .rise.
+  ST.batch('.rise', {
+    start: 'top 88%',
+    once: true,
+    onEnter: (els) => els.forEach((el, i) => setTimeout(() => el.classList.add('is-in'), i * 90)),
   });
 
-  /* --- one small pointer flourish, nothing more ------------------------ */
-  if (!REDUCED && matchMedia('(hover: hover)').matches) {
-    $$('.btn:not(.btn--soon)').forEach((btn) => {
-      btn.addEventListener('pointermove', (e) => {
-        const r = btn.getBoundingClientRect();
-        gsap.to(btn, {
-          x: ((e.clientX - r.left) / r.width - 0.5) * 8,
-          y: ((e.clientY - r.top) / r.height - 0.5) * 5,
-          duration: 0.35,
-          ease: 'power2.out',
-        });
+  // Hero: the headline rises line by line, then the stage settles.
+  gsap.from('.hero__h1 .line > span', { yPercent: 110, duration: 1.1, ease: 'power4.out', stagger: 0.09, delay: 0.1 });
+  gsap.from('.hud-chip', { autoAlpha: 0, y: 14, duration: 1, ease: smooth, stagger: 0.12, delay: 0.7 });
+  // The HUD breathes with Momo: a few pixels, slowly.
+  $$('.hud-chip').forEach((f, i) =>
+    gsap.to(f, { y: i % 2 ? 5 : -5, duration: 3 + i * 0.6, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 1.8 }),
+  );
+  // The hero's focus clock counts down.
+  const heroTime = $('#heroTime');
+  let heroS = 25 * 60;
+  setInterval(() => (heroTime.textContent = mmss((heroS = heroS > 1 ? heroS - 1 : 25 * 60))), 1000);
+  // Hero parts drift apart a little as you scroll away.
+  gsap.to('.hero__copy', { yPercent: -10, ease: 'none', scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true } });
+
+  // Strict Mode: the shield closes round the grid and every app but Momo locks, one by one.
+  const grid = $('#appGrid');
+  gsap
+    .timeline({ scrollTrigger: { trigger: grid, start: 'top 75%', end: 'center 45%', scrub: 0.6 } })
+    .from('.tile', { y: 30, autoAlpha: 0, stagger: 0.05, ease: smooth, duration: 0.5 })
+    .to('.apps__shield', { opacity: 1, scale: 1, duration: 0.5, ease: smooth, startAt: { scale: 1.08 } })
+    .add(() => grid.classList.toggle('is-locked', true))
+    .to('.tile:not(.tile--momo) .tile__lock', { opacity: 1, stagger: 0.06, duration: 0.3, ease: smooth }, '<');
+  ST.create({ trigger: grid, start: 'center 45%', onLeaveBack: () => grid.classList.remove('is-locked'), onEnter: () => grid.classList.add('is-locked') });
+
+  // Streak: the chain lights up as you scroll, and the flame grows with it.
+  const flame = { n: 1 };
+  gsap.to(flame, {
+    n: 12,
+    ease: 'none',
+    scrollTrigger: { trigger: '.streak', start: 'top 70%', end: 'center 40%', scrub: 0.4 },
+    onUpdate: () => setStreak(Math.round(flame.n)),
+  });
+  setStreak(1);
+  gsap.fromTo('.flame__svg', { scale: 0.6 }, { scale: 1, ease: 'none', scrollTrigger: { trigger: '.streak', start: 'top 70%', end: 'center 40%', scrub: 0.4 } });
+
+  // Achievements: cards turn up into place, each catching the light as it lands.
+  gsap.from('.badge', {
+    rotateX: -50,
+    y: 60,
+    autoAlpha: 0,
+    duration: 1,
+    ease: smooth,
+    stagger: { each: 0.08, grid: 'auto', from: 'start' },
+    scrollTrigger: { trigger: '#badges', start: 'top 80%', once: true },
+    onComplete() {
+      $$('.badge').forEach((b, i) => setTimeout(() => b.classList.add('is-shine'), i * 80));
+    },
+  });
+  // A gentle tilt toward the pointer.
+  if (matchMedia('(hover: hover)').matches) {
+    $$('.badge').forEach((b) => {
+      const rx = gsap.quickTo(b, 'rotateX', { duration: 0.6, ease: smooth });
+      const ry = gsap.quickTo(b, 'rotateY', { duration: 0.6, ease: smooth });
+      b.addEventListener('pointermove', (e) => {
+        const r = b.getBoundingClientRect();
+        rx(((e.clientY - r.top) / r.height - 0.5) * -14);
+        ry(((e.clientX - r.left) / r.width - 0.5) * 14);
       });
-      btn.addEventListener('pointerleave', () =>
-        gsap.to(btn, { x: 0, y: 0, duration: 0.5, ease: 'elastic.out(1, 0.4)' }),
-      );
+      b.addEventListener('pointerleave', () => {
+        rx(0);
+        ry(0);
+      });
     });
   }
 
-  // Fonts land after first paint and change every measurement on the page.
-  document.fonts?.ready.then(() => ScrollTrigger.refresh());
-}
+  // Leaderboard bars fill; the room's buddies arrive.
+  gsap.from('.board__bar i', { scaleX: 0, duration: 1.4, ease: 'power2.out', stagger: 0.12, scrollTrigger: { trigger: '#board', start: 'top 80%', once: true } });
+  gsap.from('.room__peers figure', { y: 30, autoAlpha: 0, duration: 0.9, ease: smooth, stagger: 0.08, scrollTrigger: { trigger: '.room', start: 'top 80%', once: true } });
+
+  addEventListener('load', () => ST.refresh());
+})();

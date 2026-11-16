@@ -1,44 +1,37 @@
 /* ===========================================================================
-   Momo — marketing site
+   Momo — marketing site (also styles /privacy and /terms-of-use: keep .hdr,
+   .mark, .btn, .ft and .legal working for them).
 
-   Palette and type are lifted from the app's own design system
-   (momo/docs/design.md + src/constants/theme.ts). The site commits to the app's
-   DARK theme: warm brown-black, coral, sage, gold. Deliberately one look — this
-   is the product's face, not a themeable surface.
+   The app's dark theme: one warm brown-black ground with soft, large glows in
+   the buddies' colours (CHARACTER_GLOW in momo/src/constants/characters.ts).
+   The glows live on ONE fixed backdrop (.ambient) whose colour main.js eases
+   from section to section, so there is never a seam between sections.
    =========================================================================== */
 
 :root {
-  /* app dark tokens, verbatim */
-  --bg: #231d1a;
+  --bg: #211b18;
   --surface: #2e2724;
   --alt: #3a322e;
-  --coral: #ffab8b;
-  --coral-soft: #4a342b;
-  --sage: #9cc3a6;
-  --gold: #f5c24b;
-  --ink: #f7efe6;
-  --muted: #c4b6aa;
-  --rose: #e89a9a;
-  --line: #453b36;
+  --line: #463b35;
+  --ink: #f6ede4;
+  --muted: #bfb1a5;
 
-  /* one step darker than --bg, for wells the eye should read as "behind" */
-  --well: #1c1715;
-
-  --shadow-sm: 0 2px 8px rgb(0 0 0 / 0.3);
-  --shadow-md: 0 14px 34px -10px rgb(0 0 0 / 0.5);
-  --shadow-lg: 0 44px 86px -34px rgb(0 0 0 / 0.75);
+  /* The one accent: Momo's coral. Buddy colours live only on the 3D buddies and their rings. */
+  --coral: #ff9585;
+  --blush: #ff5f6d;
+  --peach: #ffab8b;
 
   --display: 'Baloo 2', system-ui, sans-serif;
   --body: 'Nunito', system-ui, sans-serif;
   --mono: 'DM Mono', ui-monospace, monospace;
 
-  /* everything rounded — the app has no sharp corners */
   --r-card: 24px;
-  --r-chip: 16px;
   --r-pill: 999px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
 
-  --gut: clamp(20px, 5vw, 40px);
-  --bay: clamp(88px, 14vh, 168px);
+  --gut: clamp(16px, 5vw, 40px);
+  --bay: clamp(88px, 13vh, 160px);
+  --hdr: 64px;
 }
 
 *,
@@ -46,23 +39,24 @@
 *::after {
   box-sizing: border-box;
 }
-
 html {
   -webkit-text-size-adjust: 100%;
-  /* No scroll-behavior here: Lenis owns scrolling, and CSS smooth fights it. */
+  background: var(--bg);
 }
-
 body {
   margin: 0;
-  background: var(--bg);
+  /* no background here: html paints the ground, so .ambient (z-index -1) shows through */
   color: var(--ink);
   font-family: var(--body);
-  font-size: 17px;
-  line-height: 1.65;
+  font-size: 16px;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
-
+main {
+  /* clip, not hidden: no scroll container, so the sticky story still sticks */
+  overflow-x: clip;
+}
 img {
   max-width: 100%;
   display: block;
@@ -73,20 +67,21 @@ a {
 svg {
   display: block;
 }
-
-:focus-visible {
-  outline: 3px solid var(--coral);
-  outline-offset: 3px;
-  border-radius: 6px;
+button {
+  font: inherit;
+  color: inherit;
 }
-
+:focus-visible {
+  outline: 2px solid var(--coral);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
 .wrap {
   width: 100%;
-  max-width: 1180px;
+  max-width: 1160px;
   margin-inline: auto;
   padding-inline: var(--gut);
 }
-
 .skip {
   position: absolute;
   left: -9999px;
@@ -96,9 +91,45 @@ svg {
   top: 16px;
   z-index: 100;
   background: var(--surface);
-  padding: 12px 18px;
+  padding: 10px 16px;
   border-radius: var(--r-pill);
-  box-shadow: var(--shadow-md);
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* --- the backdrop --------------------------------------------------------- */
+
+/* Two very large, soft glows that fade to nothing long before any edge.
+   main.js moves --a/--b and the positions as you reach each section. */
+.ambient {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  --a: #ff9585;
+  --b: #ff9585;
+  --ax: 72%;
+  --ay: 46%;
+  --bx: 18%;
+  --by: 92%;
+  background:
+    radial-gradient(75vmax 75vmax at var(--ax) var(--ay), color-mix(in srgb, var(--a) 14%, transparent), transparent 62%),
+    radial-gradient(60vmax 60vmax at var(--bx) var(--by), color-mix(in srgb, var(--b) 6%, transparent), transparent 62%);
+}
+/* Film grain over everything, so the long gradients never band. */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 /* --- type ---------------------------------------------------------------- */
@@ -108,118 +139,120 @@ h2,
 h3 {
   font-family: var(--display);
   font-weight: 700;
-  line-height: 1.06;
+  line-height: 1.08;
   letter-spacing: -0.015em;
   margin: 0;
   text-wrap: balance;
 }
 h1 {
-  font-size: clamp(2.5rem, 5.6vw, 4.15rem);
+  font-size: clamp(2.4rem, 4.5vw, 4rem);
+  line-height: 1.02;
+  letter-spacing: -0.025em;
 }
 h2 {
-  font-size: clamp(2rem, 4.6vw, 3.1rem);
+  font-size: clamp(1.85rem, 3.2vw, 2.7rem);
 }
 h3 {
-  font-size: 1.3rem;
-  line-height: 1.22;
+  font-size: 1.15rem;
+  line-height: 1.25;
 }
 p {
   margin: 0;
 }
-
 .lede {
-  font-size: clamp(1.05rem, 1.7vw, 1.28rem);
+  font-size: clamp(1rem, 1.25vw, 1.125rem);
   color: var(--muted);
   max-width: 46ch;
-  line-height: 1.6;
+  line-height: 1.65;
 }
-
-/* Timestamps are the page's structural device: the site is one 25-minute
-   session, and each act is stamped with where you are inside it. */
-.stamp {
+.hot {
+  background: linear-gradient(100deg, var(--peach), var(--coral) 40%, var(--blush));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.eyebrow {
   font-family: var(--mono);
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   font-weight: 500;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
   color: var(--coral);
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
-.stamp::after {
+.eyebrow::before {
   content: '';
-  width: 28px;
-  height: 1px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
   background: currentColor;
-  opacity: 0.4;
+  box-shadow: 0 0 10px 1px currentColor;
 }
 
 /* --- buttons ------------------------------------------------------------- */
 
 .btn {
   font-family: var(--body);
-  font-weight: 700;
-  font-size: 1rem;
+  font-weight: 800;
+  font-size: 0.95rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 9px;
-  padding: 15px 28px;
+  gap: 8px;
+  padding: 13px 24px;
   border-radius: var(--r-pill);
   border: 0;
   cursor: pointer;
   text-decoration: none;
   white-space: nowrap;
   transition:
-    transform 0.24s cubic-bezier(0.34, 1.4, 0.64, 1),
-    box-shadow 0.24s ease,
+    transform 0.3s var(--ease),
+    box-shadow 0.3s var(--ease),
     background 0.2s ease,
-    border-color 0.2s ease;
+    border-color 0.2s ease,
+    color 0.2s ease;
 }
-/* Dark ground: coral carries dark text, not white — it's the readable pairing. */
+.btn svg {
+  width: 16px;
+  height: 16px;
+}
 .btn--primary {
-  background: var(--coral);
-  color: #2b211c;
-  box-shadow: 0 10px 26px -10px rgb(255 171 139 / 0.6);
-}
-.btn--ghost {
-  background: transparent;
-  color: var(--ink);
-  border: 1.5px solid var(--line);
+  background: linear-gradient(135deg, var(--peach), var(--coral) 50%, #ff7a7a);
+  color: #2a1512;
+  box-shadow:
+    0 10px 26px -12px rgb(255 95 109 / 0.6),
+    inset 0 1px 0 rgb(255 255 255 / 0.35);
 }
 .btn--primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 16px 34px -12px rgb(255 171 139 / 0.7);
+  transform: translateY(-1px);
+  box-shadow:
+    0 14px 32px -12px rgb(255 95 109 / 0.75),
+    inset 0 1px 0 rgb(255 255 255 / 0.35);
+}
+.btn--ghost {
+  background: rgb(255 255 255 / 0.04);
+  color: var(--ink);
+  border: 1px solid var(--line);
 }
 .btn--ghost:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   border-color: var(--coral);
   color: var(--coral);
 }
 .btn:active {
   transform: translateY(0) scale(0.985);
 }
-.btn--sm {
-  padding: 10px 20px;
-  font-size: 0.9rem;
-}
-
-/* Android isn't shipping yet — say so plainly instead of offering a dead link. */
-.btn--soon {
-  background: transparent;
-  color: var(--muted);
-  border: 1.5px dashed var(--line);
-  cursor: default;
-}
-.btn--soon:hover {
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
   transform: none;
 }
-.btn--soon::after {
-  content: 'Coming soon';
-  font-weight: 400;
-  font-size: 0.82rem;
-  opacity: 0.75;
+.btn--sm {
+  padding: 9px 18px;
+  font-size: 0.84rem;
 }
 
 /* --- header -------------------------------------------------------------- */
@@ -228,19 +261,28 @@ p {
   position: fixed;
   inset: 0 0 auto;
   z-index: 40;
-  background: color-mix(in srgb, var(--bg) 84%, transparent);
-  backdrop-filter: blur(14px) saturate(1.3);
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid transparent;
-  transition: border-color 0.3s ease;
 }
 .hdr.is-stuck {
   border-bottom-color: var(--line);
+}
+/* The home page's bar: no bar at all. */
+.hdr--clear,
+.hdr--clear.is-stuck {
+  background: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom-color: transparent;
+  text-shadow: 0 1px 10px rgb(20 15 13 / 0.55);
 }
 .hdr__in {
   display: flex;
   align-items: center;
   gap: 20px;
-  height: 68px;
+  height: var(--hdr);
 }
 .mark {
   display: flex;
@@ -248,1424 +290,1173 @@ p {
   gap: 10px;
   font-family: var(--display);
   font-weight: 700;
-  font-size: 1.32rem;
+  font-size: 1.28rem;
   letter-spacing: -0.02em;
   text-decoration: none;
 }
 .mark img {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: 9px;
+  box-shadow: 0 4px 14px -4px rgb(0 0 0 / 0.5);
 }
-.hdr__clock {
+.hdr--clear .mark {
+  gap: 0;
+}
+/* The wordmark folds away once you scroll, leaving the icon. */
+.mark__word {
+  display: inline-block;
+  overflow: hidden;
+  max-width: 5em;
+  margin-left: 10px;
+  transition:
+    max-width 0.6s var(--ease),
+    margin 0.6s var(--ease),
+    opacity 0.35s ease;
+}
+.hdr.is-compact .mark__word {
+  max-width: 0;
+  margin-left: 0;
+  opacity: 0;
+}
+.hdr__nav {
+  display: flex;
+  gap: 26px;
   margin-left: auto;
-  font-family: var(--mono);
-  font-size: 0.82rem;
-  font-weight: 500;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+.hdr__nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  text-decoration: none;
   color: var(--muted);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.04em;
+  transition: color 0.2s ease;
 }
-.hdr__bar {
-  position: absolute;
-  left: 0;
-  bottom: -1px;
-  height: 2px;
-  width: 100%;
-  transform: scaleX(var(--p, 0));
-  transform-origin: 0 50%;
-  background: linear-gradient(90deg, var(--coral), var(--gold));
+.hdr__nav svg {
+  width: 16px;
+  height: 16px;
+  opacity: 0.85;
 }
-@media (max-width: 640px) {
-  .hdr__clock {
+.hdr__nav a:hover {
+  color: var(--ink);
+}
+.hdr__cta {
+  margin-left: auto;
+  text-shadow: none;
+}
+.hdr__nav + .hdr__cta {
+  margin-left: 8px;
+}
+@media (max-width: 900px) {
+  .hdr__nav {
     display: none;
   }
-  .hdr__cta {
+  .hdr__nav + .hdr__cta {
     margin-left: auto;
   }
 }
 
-/* --- the ghost sprite ---------------------------------------------------
-   Real app art. Each sheet is a 6x6 row-major grid of 36 frames at 12fps
-   (momo/src/components/character/character.tsx). Two stepped keyframes walk the
-   grid: x cycles every 6 frames, y advances one row per x cycle.
+/* --- the shared WebGL canvas --------------------------------------------- */
 
-   Size is width/height scaled by --gs, NOT transform: scale(). A transform
-   shrinks the paint but leaves a full-size layout box, which is what pushed the
-   marketplace characters out of their cards. background-size is a percentage of
-   the box, so scaling the box scales the sprite correctly — and it leaves
-   `transform` free for the per-state animations below.
-   ---------------------------------------------------------------------- */
-
-.ghost {
-  --gs: 1;
-  width: calc(var(--fw) * var(--gs));
-  height: calc(var(--fh) * var(--gs));
-  background-image: var(--sheet);
-  background-repeat: no-repeat;
-  background-size: 600% 600%;
-  /* `jump-none` is load-bearing: plain steps(6) is jump-end, which lands on
-     0/16.7/33.3/50/66.7/83.3% and never reaches the last frame — every position
-     then falls between two frames and you see two half-ghosts. jump-none gives
-     the six positions a 6-frame strip needs: 0/20/40/60/80/100%. */
-  animation:
-    ghost-x var(--row, 0.5s) steps(6, jump-none) infinite,
-    ghost-y calc(var(--row, 0.5s) * 6) steps(6, jump-none) infinite;
-  transform-origin: 50% 90%;
-  transition:
-    filter 0.6s ease,
-    opacity 0.6s ease;
-}
-@keyframes ghost-x {
-  from {
-    background-position-x: 0%;
-  }
-  to {
-    background-position-x: 100%;
-  }
-}
-@keyframes ghost-y {
-  from {
-    background-position-y: 0%;
-  }
-  to {
-    background-position-y: 100%;
-  }
-}
-
-/* Frame sizes are each sheet's own — the four sheets don't match, exactly as in
-   the app's SPRITES registry. Regenerate with scripts/sprites.py after new art. */
-.ghost--default {
-  --sheet: url('assets/sprites/ghost.webp');
-  --fw: 255px;
-  --fh: 249px;
-}
-.ghost--mint {
-  --sheet: url('assets/sprites/ghost-mint.webp');
-  --fw: 217px;
-  --fh: 252px;
-}
-.ghost--ember {
-  --sheet: url('assets/sprites/ghost-ember.webp');
-  --fw: 178px;
-  --fh: 241px;
-}
-.ghost--shadow {
-  --sheet: url('assets/sprites/ghost-shadow.webp');
-  --fw: 227px;
-  --fh: 224px;
-}
-
-/* Only `idle` art shipped with the app, so the other states are expressed with
-   transforms on the idle loop — same read, no missing sheets. */
-.ghost[data-state='busy'] {
-  --row: 0.42s;
-  animation-name: ghost-x, ghost-y, ghost-work;
-  animation-duration: var(--row), calc(var(--row) * 6), 2.4s;
-  animation-timing-function: steps(6, jump-none), steps(6, jump-none), ease-in-out;
-  animation-iteration-count: infinite, infinite, infinite;
-}
-.ghost[data-state='sad'] {
-  --row: 0.78s;
-  filter: saturate(0.4) brightness(0.9);
-  opacity: 0.7;
-  transform: translateY(6px) scale(1.04, 0.9) rotate(-4deg);
-}
-.ghost[data-state='celebrating'] {
-  --row: 0.3s;
-  animation-name: ghost-x, ghost-y, ghost-cheer;
-  animation-duration: var(--row), calc(var(--row) * 6), 0.62s;
-  animation-timing-function: steps(6, jump-none), steps(6, jump-none),
-    cubic-bezier(0.3, 1.5, 0.5, 1);
-  animation-iteration-count: infinite, infinite, infinite;
-}
-@keyframes ghost-work {
-  0%,
-  100% {
-    transform: rotate(-1.6deg);
-  }
-  50% {
-    transform: rotate(1.6deg);
-  }
-}
-@keyframes ghost-cheer {
-  0%,
-  100% {
-    transform: translateY(0) scale(1, 1);
-  }
-  35% {
-    transform: translateY(-14px) scale(0.95, 1.08);
-  }
-  70% {
-    transform: translateY(0) scale(1.07, 0.94);
-  }
-}
-
-/* --- hero ---------------------------------------------------------------- */
-
-/* The hero owns exactly one viewport: content centred, scroll cue pinned to the
-   bottom edge. Fixed paddings left a dead band under the fold on tall screens. */
-.hero {
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding-top: 118px;
-  padding-bottom: 26px;
-}
-.hero__in {
-  display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
-  gap: clamp(28px, 5vw, 72px);
-  align-items: center;
-  /* Grow into the leftover height and centre inside it, so the slack is shared
-     above and below the content instead of pooling under it. */
-  flex: 1;
-  align-content: center;
-}
-.hero h1 {
-  margin-bottom: 26px;
-}
-/* The left column: a warm bloom behind the headline balances the dial's glow on
-   the right, so the composition isn't lit on one side only. */
-.hero__copy {
-  position: relative;
-  isolation: isolate;
-}
-.hero__copy::before {
-  content: '';
-  position: absolute;
-  left: -14%;
-  top: -22%;
-  width: 78%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    color-mix(in srgb, var(--coral) 15%, transparent),
-    transparent 68%
-  );
-  z-index: -1;
-  pointer-events: none;
-}
-
-.pre {
-  display: block;
-  font-size: 0.47em;
-  font-weight: 500;
-  line-height: 1.12;
-  letter-spacing: -0.01em;
-  color: color-mix(in srgb, var(--ink) 72%, var(--bg));
-  margin-bottom: 0.06em;
-}
-
-/* The changing word is the product's whole idea, so the type says it. */
-.cycler {
-  display: grid;
-  justify-items: start;
-  color: var(--coral);
-}
-.cycler > span {
-  position: relative;
-  grid-area: 1 / 1;
-  opacity: 0;
-  transform: translateY(0.42em) rotate(2deg);
-  transition:
-    opacity 0.42s ease,
-    transform 0.52s cubic-bezier(0.2, 1.3, 0.4, 1);
-}
-.cycler > span.is-on {
-  opacity: 1;
-  transform: none;
-}
-.cycler > span.is-on::after {
-  content: '';
-  position: absolute;
-  left: 0.04em;
-  right: 0.04em;
-  bottom: 0.07em;
-  height: 0.075em;
-  border-radius: var(--r-pill);
-  background: currentColor;
-  opacity: 0.42;
-  transform-origin: 0 50%;
-  animation: word-rule 0.6s cubic-bezier(0.2, 1, 0.3, 1) 0.14s both;
-}
-@keyframes word-rule {
-  from {
-    transform: scaleX(0);
-  }
-}
-
-.hero__cta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 34px;
-}
-/* Four true things, stated flatly. Real capabilities, not invented metrics. */
-.facts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 28px 0 0;
-  padding: 0;
-  list-style: none;
-  max-width: 52ch;
-}
-.facts li {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--mono);
-  font-size: 0.735rem;
-  letter-spacing: 0.03em;
-  color: var(--muted);
-  border: 1px solid var(--line);
-  background: color-mix(in srgb, var(--surface) 55%, transparent);
-  border-radius: var(--r-pill);
-  padding: 7px 14px;
-  transition:
-    border-color 0.25s ease,
-    color 0.25s ease;
-}
-.facts li:hover {
-  border-color: color-mix(in srgb, var(--coral) 40%, var(--line));
-  color: var(--ink);
-}
-.facts li b {
-  color: var(--coral);
-  font-weight: 500;
-}
-/* Platform qualifier, so "Strict Mode" doesn't need a footnote elsewhere. */
-.facts li span {
-  font-size: 0.64rem;
-  letter-spacing: 0.04em;
-  color: var(--coral);
-  border: 1px solid color-mix(in srgb, var(--coral) 34%, transparent);
-  border-radius: var(--r-pill);
-  padding: 1px 6px;
-}
-
-.hero__note {
-  margin-top: 18px;
-  font-size: 0.9rem;
-  color: var(--muted);
-}
-.hero__note b {
-  color: var(--sage);
-}
-
-/* Ghost inside a live timer ring — the hero states the thesis in one image. */
-.dial {
-  position: relative;
-  display: grid;
-  place-items: center;
-  justify-self: center;
-  width: min(400px, 82vw);
-  aspect-ratio: 1;
-}
-.dial__ring {
-  position: absolute;
+.gl {
+  position: fixed;
   inset: 0;
   width: 100%;
   height: 100%;
-  transform: rotate(-90deg);
+  z-index: 30; /* over the page, under the header; drawn only inside the slots */
+  pointer-events: none;
 }
-.dial__ring circle {
-  fill: none;
-  stroke-width: 5.5;
-  stroke-linecap: round;
-}
-.dial__track {
-  stroke: var(--coral-soft);
-}
-.dial__fill {
-  stroke: var(--coral);
-  stroke-dasharray: 339.29;
-  stroke-dashoffset: calc(339.29 * (1 - var(--p, 0)));
-  transition: stroke-dashoffset 0.5s linear;
-}
-.dial__glow {
-  position: absolute;
-  width: 74%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: radial-gradient(circle, var(--coral-soft), transparent 68%);
-  opacity: 0.7;
-  animation: breathe 5.5s ease-in-out infinite;
-}
-@keyframes breathe {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 0.55;
-  }
-  50% {
-    transform: scale(1.09);
-    opacity: 0.85;
-  }
-}
-.dial .ghost {
-  --gs: 0.92;
+.view {
   position: relative;
-  z-index: 1;
-}
-/* Three motes drifting around the buddy: the only decoration in the hero, and
-   it's the app's own "focusing" mood rather than generic particles. */
-.spark {
-  position: absolute;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--coral);
-  opacity: 0;
-  animation: drift 7s ease-in-out infinite;
-}
-.spark:nth-of-type(1) {
-  left: 14%;
-  top: 34%;
-  animation-delay: 0s;
-}
-.spark:nth-of-type(2) {
-  right: 12%;
-  top: 52%;
-  width: 5px;
-  height: 5px;
-  background: var(--gold);
-  animation-delay: 2.4s;
-}
-.spark:nth-of-type(3) {
-  left: 30%;
-  bottom: 18%;
-  width: 4px;
-  height: 4px;
-  background: var(--sage);
-  animation-delay: 4.6s;
-}
-@keyframes drift {
-  0%,
-  100% {
-    opacity: 0;
-    transform: translateY(10px) scale(0.6);
-  }
-  30%,
-  62% {
-    opacity: 0.85;
-  }
-  50% {
-    transform: translateY(-16px) scale(1);
-  }
-}
-
-/* Pre-start: a scrim over the ring, a button where the clock will be, and the
-   3-2-1 in the middle once it's pressed. Three states, all on .dial. */
-.dial__scrim,
-.dial__start,
-.dial__count {
-  position: absolute;
-  opacity: 0;
-  visibility: hidden;
-  transition:
-    opacity 0.4s ease,
-    visibility 0.4s;
-}
-.dial[data-state='idle'] .dial__scrim,
-.dial[data-state='count'] .dial__scrim,
-.dial[data-state='idle'] .dial__start,
-.dial[data-state='count'] .dial__count {
-  opacity: 1;
-  visibility: visible;
-}
-.dial__scrim {
-  inset: 5%;
-  border-radius: 50%;
-  z-index: 2;
-  background: color-mix(in srgb, var(--bg) 50%, transparent);
-  backdrop-filter: blur(1.2px);
-}
-/* No insets: the dial's own `place-items: center` puts it dead centre, where the
-   3-2-1 lands the moment it's pressed. */
-.dial__start {
-  z-index: 3;
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  padding: 11px 20px 12px;
-  border: 0;
-  border-radius: var(--r-pill);
-  background: var(--coral);
-  color: #33251d;
-  font-family: var(--display);
-  font-weight: 700;
-  font-size: 0.95rem;
   cursor: pointer;
-  box-shadow: 0 12px 30px -14px var(--coral);
-  transition:
-    opacity 0.4s ease,
-    visibility 0.4s,
-    transform 0.25s ease;
-}
-.dial__start svg {
-  width: 15px;
-  height: 15px;
-  fill: currentColor;
-}
-.dial__start:hover {
-  transform: translateY(-2px);
-}
-.dial__start:active {
-  transform: translateY(0);
-}
-.dial__count {
-  z-index: 3;
-  margin: 0;
-  font-family: var(--display);
-  font-size: clamp(3.6rem, 9vw, 5.6rem);
-  line-height: 1;
-  color: var(--ink);
-}
-/* The digit is replaced on every beat, which is what restarts this. */
-.dial__count span {
-  display: inline-block;
-  animation: count-pop 0.6s cubic-bezier(0.2, 1.4, 0.35, 1);
-}
-@keyframes count-pop {
-  from {
-    transform: scale(0.55);
-    opacity: 0.2;
-  }
-}
-/* The button owns the clock's spot before the clock has anything to say. */
-.dial[data-state='idle'] .dial__time,
-.dial[data-state='count'] .dial__time {
-  opacity: 0;
 }
 
-.dial__time {
-  position: absolute;
-  bottom: 13%; /* inside the ring, clear of both the stroke and the buddy */
-  transition: opacity 0.35s ease;
-  font-family: var(--mono);
-  font-size: 0.9rem;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
-}
-
-.cue {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding-top: clamp(28px, 5vh, 56px);
-  font-family: var(--mono);
-  font-size: 0.74rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-.cue span {
-  width: 1px;
-  height: 34px;
-  background: linear-gradient(var(--muted), transparent);
-  animation: cue-fall 1.9s ease-in-out infinite;
-  transform-origin: top;
-}
-@keyframes cue-fall {
-  0%,
-  100% {
-    transform: scaleY(0.35);
-    opacity: 0.4;
-  }
-  50% {
-    transform: scaleY(1);
-    opacity: 1;
-  }
-}
-
-/* --- story: sticky phone (left) + acts (right) -------------------------- */
-
-.story__in {
-  display: grid;
-  grid-template-columns: 360px 1fr;
-  gap: clamp(32px, 6vw, 96px);
-  align-items: start;
-}
-.rail {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  display: grid;
-  place-items: center;
-  pointer-events: none;
-}
-.acts {
-  display: flex;
-  flex-direction: column;
-  /* The rail is sticky inside its grid row, and the row is only as tall as this
-     column — so without a tail the phone starts sliding away while the last act
-     is still arriving. This keeps it pinned until that copy has had its turn. */
-  padding-bottom: 30vh;
-}
-.act {
-  /* Tall enough that each beat gets its own scroll moment, short enough that the
-     centred copy doesn't leave half a screen of empty room around it. */
-  min-height: 52vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding-block: 4vh;
-}
-.act h2 {
-  margin-bottom: 18px;
-}
-.act__row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 26px;
-}
-
-/* --- phone mockup -------------------------------------------------------
-   A CSS device frame with the app's screens rebuilt inside it from the same
-   tokens. Swap a `.screen` for an <img> of a real capture and the frame,
-   shadow, radii and Dynamic Island keep working.
-   ---------------------------------------------------------------------- */
-
-.phone {
-  --pw: 306px;
-  width: var(--pw);
-  aspect-ratio: 306 / 628;
-  background: linear-gradient(150deg, #575049, #211c19 55%, #423a34);
-  border-radius: 48px;
-  padding: 9px;
-  box-shadow:
-    var(--shadow-lg),
-    0 0 0 1px rgb(255 255 255 / 0.1) inset;
-  position: relative;
-}
-.phone::after {
-  content: '';
-  position: absolute;
-  right: -2px;
-  top: 30%;
-  width: 2px;
-  height: 46px;
-  border-radius: 2px;
-  background: #6a6058;
-}
-.phone__screen {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  border-radius: 40px;
-  overflow: hidden;
-  background: var(--bg);
-}
-
-/* Dynamic Island. It's the real device element, so it's the honest place to
-   show a Live Activity — it expands when a session is running. */
-.notch {
-  position: absolute;
-  top: 21px; /* 9px bezel + a real gap below the screen edge */
-  left: 50%;
-  transform: translateX(-50%);
-  width: 98px;
-  height: 26px;
-  border-radius: var(--r-pill);
-  background: #100d0c;
-  z-index: 8;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  overflow: hidden;
-  transition:
-    width 0.62s cubic-bezier(0.3, 1.35, 0.4, 1),
-    height 0.62s cubic-bezier(0.3, 1.35, 0.4, 1),
-    background 0.4s ease;
-}
-.phone[data-island='on'] .notch,
-.phone[data-island='grace'] .notch {
-  width: 202px;
-  height: 40px;
-}
-.phone[data-island='grace'] .notch {
-  background: #2a1414;
-}
-.notch__in {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  opacity: 0;
-  transform: scale(0.7);
-  transition:
-    opacity 0.3s ease 0.16s,
-    transform 0.42s cubic-bezier(0.3, 1.4, 0.4, 1) 0.16s;
-}
-.phone[data-island='on'] .notch__in,
-.phone[data-island='grace'] .notch__in {
-  opacity: 1;
-  transform: none;
-}
-.notch .ghost {
-  --gs: 0.078;
-}
-.notch__t {
-  font-family: var(--mono);
-  font-weight: 500;
-  font-size: 0.76rem;
-  color: #f7efe6;
-  font-variant-numeric: tabular-nums;
-}
-.notch__bar {
-  width: 46px;
-  height: 3px;
-  border-radius: var(--r-pill);
-  background: rgb(255 255 255 / 0.22);
-  overflow: hidden;
-}
-.notch__bar i {
-  display: block;
-  height: 100%;
-  width: calc(var(--p, 0) * 100%);
-  background: var(--coral);
-  border-radius: var(--r-pill);
-}
-.phone[data-island='grace'] .notch__t {
-  color: var(--rose);
-}
-.phone[data-island='grace'] .notch__bar i {
-  background: var(--rose);
-}
-
-/* Screens stack and crossfade as the story advances. */
-.screen {
-  position: absolute;
-  inset: 0;
-  padding: 64px 16px 0; /* clears the expanded Dynamic Island */
-  display: flex;
-  flex-direction: column;
-  opacity: 0;
-  visibility: hidden;
-  transition:
-    opacity 0.55s ease,
-    visibility 0.55s;
-}
-.screen.is-on {
-  opacity: 1;
-  visibility: visible;
-}
-
-.sc__hi {
-  font-family: var(--display);
-  font-weight: 700;
-  font-size: 1.08rem;
-  line-height: 1.2;
-}
-.sc__sub {
-  font-size: 0.68rem;
-  color: var(--muted);
-  margin-top: 1px;
-}
-.chips {
-  display: flex;
-  gap: 6px;
-  margin-top: 12px;
-}
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--r-pill);
-  padding: 4px 9px;
-  font-size: 0.66rem;
-  font-weight: 700;
-}
-.chip--coin {
-  color: var(--gold);
-  background: color-mix(in srgb, var(--gold) 14%, var(--surface));
-  border-color: color-mix(in srgb, var(--gold) 30%, var(--line));
-}
-.chip--streak {
-  color: var(--sage);
-  background: color-mix(in srgb, var(--sage) 12%, var(--surface));
-  border-color: color-mix(in srgb, var(--sage) 28%, var(--line));
-}
-
-.sc__stage {
-  flex: 1;
-  display: grid;
-  place-items: center;
-}
-.sc__stage .ghost {
-  --gs: 0.58;
-}
-.sc__stage[data-scale='sm'] .ghost {
-  --gs: 0.46;
-}
-
-.durs {
-  display: flex;
-  gap: 7px;
-  justify-content: center;
-  margin-bottom: 12px;
-}
-.dur {
-  font-family: var(--display);
-  font-weight: 700;
-  font-size: 0.82rem;
-  min-width: 42px;
-  padding: 8px 4px;
-  text-align: center;
-  border-radius: var(--r-chip);
-  background: var(--surface);
-  border: 1px solid var(--line);
-  color: var(--muted);
-}
-.dur small {
-  display: block;
-  font-family: var(--body);
-  font-size: 0.54rem;
-  font-weight: 700;
-  opacity: 0.7;
-}
-.dur.is-on {
-  background: var(--coral);
-  border-color: var(--coral);
-  color: #2b211c;
-  transform: scale(1.06);
-}
-
-.sc__btn {
-  text-align: center;
-  font-family: var(--display);
-  font-weight: 700;
-  font-size: 0.94rem;
-  background: var(--coral);
-  color: #2b211c;
-  border-radius: var(--r-pill);
-  padding: 13px;
-  margin-bottom: 10px;
-}
-
-.tabs {
-  display: flex;
-  justify-content: space-around;
-  padding: 9px 0 16px;
-  border-top: 1px solid var(--line);
-  background: var(--surface);
-  margin: 0 -16px;
-}
-.tab {
-  width: 20px;
-  height: 20px;
-  border-radius: 6px;
-  background: var(--line);
-}
-.tab.is-on {
-  background: var(--coral);
-}
-
-.sc__timer {
-  font-family: var(--mono);
-  font-weight: 500;
-  font-size: 2.5rem;
-  letter-spacing: -0.02em;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-  margin-top: 6px;
-}
-.sc__label {
-  text-align: center;
-  font-size: 0.66rem;
-  color: var(--muted);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-.sc__track {
-  height: 5px;
-  border-radius: var(--r-pill);
-  background: var(--coral-soft);
-  overflow: hidden;
-  margin: 14px 4px 0;
-}
-.sc__track i {
-  display: block;
-  height: 100%;
-  border-radius: var(--r-pill);
-  background: var(--coral);
-  width: calc(var(--p, 0) * 100%);
-}
-.sc__hint {
-  text-align: center;
-  font-size: 0.63rem;
-  color: var(--muted);
-  padding-bottom: 20px;
-}
-.sc__hint b {
-  color: var(--rose);
-}
-
-.rewards {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  margin-bottom: 14px;
-}
-.reward {
-  flex: 1;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--r-chip);
-  padding: 9px 6px;
-  text-align: center;
-}
-.reward b {
-  display: block;
-  font-family: var(--display);
-  font-size: 1.05rem;
-  line-height: 1.1;
-}
-.reward small {
-  font-size: 0.56rem;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-}
-.reward--xp b {
-  color: var(--coral);
-}
-.reward--coin b {
-  color: var(--gold);
-}
-.reward--streak b {
-  color: var(--sage);
-}
-
-/* --- lockscreen (inside the phone) ------------------------------------- */
-
-.screen--lock {
-  padding: 0;
-  background: linear-gradient(168deg, #2b2320, #14100f 62%, #241d1a);
-  justify-content: flex-start;
-  align-items: center;
-}
-.lockface {
-  padding-top: 66px;
-  text-align: center;
-  color: #f7efe6;
-}
-.lockface__d {
-  font-size: 0.68rem;
-  opacity: 0.66;
-  letter-spacing: 0.02em;
-}
-.lockface__t {
-  font-family: var(--mono);
-  font-weight: 400;
-  font-size: 3.5rem;
-  line-height: 1;
-  letter-spacing: -0.03em;
-  font-variant-numeric: tabular-nums;
-}
-/* The Live Activity card, as it sits on a real lockscreen. */
-.la {
-  margin-top: auto;
-  margin-bottom: 26px;
-  width: calc(100% - 24px);
-  background: rgb(247 239 230 / 0.09);
-  border: 1px solid rgb(247 239 230 / 0.16);
-  backdrop-filter: blur(10px);
-  border-radius: 20px;
-  padding: 11px 13px;
-  color: #f7efe6;
-  display: grid;
-  gap: 8px;
-}
-.la__top {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 0.7rem;
-  font-weight: 700;
-}
-.la__top img {
-  width: 17px;
-  height: 17px;
-  border-radius: 5px;
-}
-.la__top span {
-  margin-left: auto;
-  font-family: var(--mono);
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-}
-.la__body {
-  display: flex;
-  align-items: flex-end;
-  gap: 9px;
-}
-.la .ghost {
-  --gs: 0.16;
-  flex: none;
-}
-.la__side {
-  flex: 1;
-  display: grid;
-  gap: 6px;
-  padding-bottom: 3px;
-}
-.la__lbl {
-  font-size: 0.62rem;
-  opacity: 0.7;
-}
-.la__track {
-  height: 4px;
-  border-radius: var(--r-pill);
-  background: rgb(247 239 230 / 0.2);
-  overflow: hidden;
-}
-.la__track i {
-  display: block;
-  height: 100%;
-  width: calc(var(--p, 0) * 100%);
-  border-radius: var(--r-pill);
-  background: var(--coral);
-}
-
-/* --- generic sections --------------------------------------------------- */
+/* --- sections ------------------------------------------------------------ */
 
 .sec {
+  position: relative;
   padding-block: var(--bay);
 }
-/* No max-width here: .sec__head is used together with .wrap, whose
-   `margin-inline: auto` would then centre the whole header instead of leaving it
-   on the gutter. The h2 and .lede constrain their own measure. */
 .sec__head {
   margin-bottom: clamp(36px, 5vw, 60px);
 }
 .sec__head h2 {
   margin-bottom: 16px;
+  max-width: 18ch;
 }
-
-.card {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--r-card);
-  box-shadow: var(--shadow-sm);
-  transition:
-    transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1),
-    box-shadow 0.3s ease,
-    border-color 0.3s ease;
-}
-.card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-md);
-  border-color: color-mix(in srgb, var(--coral) 34%, var(--line));
-}
-
-/* --- cast shelf --------------------------------------------------------- */
-
-.shelf {
-  overflow: hidden;
-}
-.belt {
-  display: flex;
-  gap: 18px;
-  padding-inline: var(--gut);
-  width: max-content;
-}
-.cast .card {
-  width: 210px;
-  padding: 22px;
-  display: grid;
-  justify-items: center;
-  gap: 6px;
+.sec__head--center {
   text-align: center;
 }
-/* Fixed art row + bottom-centred: every character sits on the same baseline
-   regardless of how tall its frame is. */
-.cast__art {
-  height: 168px;
-  display: grid;
-  place-items: end center;
-}
-.cast .card .ghost {
-  --gs: 0.52;
-}
-.cast__art img {
-  max-height: 152px;
-  width: auto;
-}
-.card__name {
-  font-family: var(--display);
-  font-weight: 700;
-  font-size: 1rem;
-}
-.card__cost {
-  font-family: var(--mono);
-  font-size: 0.72rem;
-  color: var(--gold);
-  background: color-mix(in srgb, var(--gold) 16%, transparent);
-  padding: 3px 10px;
-  border-radius: var(--r-pill);
+.sec__head--center h2,
+.sec__head--center .lede {
+  margin-inline: auto;
 }
 
-/* --- feature shelf (horizontal) ---------------------------------------- */
+/* --- hero ---------------------------------------------------------------- */
 
-.feat .card {
-  width: 340px;
-  padding: 28px;
-  display: grid;
-  align-content: start;
-  gap: 14px;
-}
-.feat__art {
-  height: 158px;
-  border-radius: 18px;
-  background: var(--well);
-  border: 1px solid var(--line);
-  display: grid;
-  place-items: center;
-  overflow: hidden;
+.hero {
   position: relative;
+  padding-top: calc(var(--hdr) + clamp(24px, 6vh, 64px));
+  padding-bottom: clamp(32px, 6vh, 72px);
 }
-.feat__ico {
-  width: 44px;
-  height: 44px;
+.hero__in {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(16px, 3vw, 40px);
+  align-items: center;
+}
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 14px;
+  border-radius: var(--r-pill);
+  background: rgb(255 149 133 / 0.1);
+  border: 1px solid rgb(255 149 133 / 0.26);
+  color: var(--peach);
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.04em;
+  margin-bottom: 22px;
+}
+.pill__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--blush);
+  animation: ping 2.4s ease-out infinite;
+}
+@keyframes ping {
+  0% {
+    box-shadow: 0 0 0 0 rgb(255 95 109 / 0.55);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 8px rgb(255 95 109 / 0);
+  }
+}
+.hero__h1 {
+  margin-bottom: 20px;
+}
+.hero__h1 .line {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+.hero__h1 .line > span {
+  display: inline-block;
+}
+.hero__stage {
+  position: relative;
+  aspect-ratio: 1;
+  width: 100%;
+  max-width: 600px;
+  justify-self: center;
+}
+.hero__halo {
+  position: absolute;
+  inset: 4%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(255 149 133 / 0.26), rgb(255 95 109 / 0.08) 55%, transparent);
+  pointer-events: none;
+}
+.view--hero {
+  position: absolute;
+  inset: 0;
+}
+/* The HUD: small chips anchored round Momo. */
+.hud-chip {
+  position: absolute;
+  z-index: 31; /* above the canvas */
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 13px;
+  border-radius: 14px;
+  background: rgb(38 31 28 / 0.72);
+  border: 1px solid rgb(255 255 255 / 0.08);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-size: 0.8rem;
+  color: var(--muted);
+  box-shadow: 0 12px 30px -14px rgb(0 0 0 / 0.6);
+  pointer-events: none;
+  white-space: nowrap;
+}
+.hud-chip b {
+  color: var(--ink);
+  font-family: var(--display);
+  font-size: 0.98rem;
+}
+.hud-chip svg {
+  width: 16px;
+  height: 16px;
+}
+.hud-chip svg {
+  color: var(--coral);
+}
+.hud-chip--coins {
+  top: 22%;
+  left: 9%;
+}
+.hud-chip--streak {
+  top: 40%;
+  right: 6%;
+}
+.hud-chip--time {
+  bottom: 9%;
+  left: 50%;
+  translate: -50% 0;
+}
+.hud-chip__t {
+  font-family: var(--mono);
+  color: var(--coral);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- waitlist form ------------------------------------------------------- */
+
+.wl {
+  margin-top: 28px;
+  max-width: 480px;
+}
+.wl__row {
+  display: flex;
+  gap: 6px;
+  padding: 5px;
+  border-radius: var(--r-pill);
+  background: rgb(255 255 255 / 0.05);
+  border: 1px solid var(--line);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.3s ease;
+}
+.wl__row:focus-within {
+  border-color: var(--coral);
+  box-shadow: 0 0 0 4px rgb(255 149 133 / 0.12);
+}
+.wl__input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: 0;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.98rem;
+  padding: 9px 16px;
+  outline: none;
+}
+.wl__input::placeholder {
+  color: rgb(201 187 175 / 0.55);
+}
+.wl__btn {
+  flex: none;
+}
+.wl__status {
+  min-height: 1.5em;
+  margin-top: 10px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  transition: opacity 0.4s ease;
+}
+.wl__status.is-fading {
+  opacity: 0;
+}
+.wl__status.is-error {
+  color: #ffb3a8;
+}
+.wl__status.is-ok {
+  color: var(--ink);
+}
+.wl.is-busy .wl__btn {
+  opacity: 0.7;
+  cursor: progress;
+}
+.wl.is-done .wl__row {
+  border-color: rgb(255 149 133 / 0.5);
+  background: rgb(255 149 133 / 0.07);
+}
+.wl.is-done .wl__input {
+  color: var(--muted);
+}
+.wl--center {
+  margin-inline: auto;
+  text-align: left;
+}
+.wl--center .wl__status {
+  text-align: center;
+}
+.hp {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* --- how it works -------------------------------------------------------- */
+
+.how {
+  position: relative;
+  height: 520vh;
+}
+.how__sticky {
+  /* sticky makes a stacking context: lift it over the canvas so the HUD sits on the 3D */
+  z-index: 31;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+.how__in {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: clamp(24px, 4vw, 56px);
+  align-items: center;
+  padding-top: var(--hdr);
+}
+.how__title {
+  margin-bottom: 28px;
+}
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+}
+.step {
+  grid-area: 1 / 1;
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 0.5s ease,
+    transform 0.7s var(--ease);
+  pointer-events: none;
+}
+.step.is-on {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+.step__n {
+  font-family: var(--mono);
+  color: var(--coral);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+}
+.step h3 {
+  font-size: clamp(1.4rem, 2.2vw, 1.8rem);
+  margin: 6px 0 10px;
+}
+.step p {
+  color: var(--muted);
+  font-size: 1.02rem;
+  max-width: 42ch;
+}
+.how__stage {
+  position: relative;
+  height: min(76vh, 680px);
+}
+.view--story {
+  position: absolute;
+  inset: 0;
+}
+.view--story::before {
+  content: '';
+  position: absolute;
+  inset: 10% 8%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--story-glow, rgb(255 95 109 / 0.22)), transparent);
+  transition: background 0.8s ease;
+  pointer-events: none;
+}
+.hud {
+  position: absolute;
+  inset: 0;
+  z-index: 31;
+  pointer-events: none;
+}
+.hud__timer {
+  position: absolute;
+  top: 2%;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  font-family: var(--mono);
+  font-size: clamp(1.7rem, 2.8vw, 2.3rem);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  transition: color 0.4s ease;
+}
+.hud__timer small {
+  display: block;
+  font-size: 0.68rem;
+  color: var(--muted);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-top: 8px;
+}
+.hud__apps {
+  position: absolute;
+  inset: 0;
+}
+.app {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 46px;
+  height: 46px;
+  margin: -23px 0 0 -23px;
   border-radius: 14px;
   display: grid;
   place-items: center;
-  background: color-mix(in srgb, var(--coral) 15%, transparent);
-  border: 1px solid color-mix(in srgb, var(--coral) 30%, var(--line));
+  color: var(--ink);
+  background: linear-gradient(150deg, #4a3f3a, #342b27);
+  border: 1px solid rgb(255 255 255 / 0.08);
+  box-shadow: 0 10px 22px -10px rgb(0 0 0 / 0.6);
+  opacity: 0;
+}
+.app svg {
+  width: 24px;
+  height: 24px;
+}
+.hud__reward,
+.hud__fail {
+  position: absolute;
+  bottom: -2%;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  opacity: 0;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px;
+  border-radius: var(--r-pill);
+  font-weight: 800;
+  font-size: 0.84rem;
+  background: rgb(38 31 28 / 0.82);
+  border: 1px solid rgb(255 255 255 / 0.09);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.chip svg {
+  width: 16px;
+  height: 16px;
+}
+.chip svg {
   color: var(--coral);
 }
-.feat__ico svg {
-  width: 22px;
-  height: 22px;
+.chip--bad {
+  color: var(--peach);
 }
-.feat h3 {
-  font-family: var(--display);
-}
-.feat p {
-  color: var(--muted);
-  font-size: 0.98rem;
-}
-.feat .ghost {
-  --gs: 0.3;
-}
-
-/* badge trio inside a feature card */
-.badges {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.badges img {
-  width: 62px;
-  height: 62px;
-  filter: drop-shadow(0 6px 12px rgb(0 0 0 / 0.4));
-}
-.badges img:nth-child(2) {
-  width: 82px;
-  height: 82px;
-}
-
-/* mini heatmap */
-.heat {
+.dots {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
   display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 4px;
-  padding: 18px;
-  width: 100%;
-}
-.heat i {
-  aspect-ratio: 1;
-  border-radius: 3px;
-  background: color-mix(in srgb, var(--coral) calc(var(--v) * 1%), var(--alt));
-}
-
-/* mini streak strip */
-.strip {
-  display: flex;
-  gap: 6px;
-}
-.strip i {
-  width: 20px;
-  height: 30px;
-  border-radius: 7px;
-  background: var(--alt);
-  border: 1px solid var(--line);
-}
-.strip i.on {
-  background: var(--sage);
-  border-color: var(--sage);
-}
-
-.faces {
-  display: flex;
-  align-items: flex-end;
   gap: 8px;
+  z-index: 31;
 }
-.face {
-  display: grid;
-  justify-items: center;
-  gap: 2px;
-  text-align: center;
+.dots i {
+  width: 4px;
+  height: 18px;
+  border-radius: 2px;
+  background: rgb(255 255 255 / 0.14);
+  transition:
+    background 0.4s ease,
+    height 0.5s var(--ease);
 }
-.face > div {
-  height: 92px;
-  display: grid;
-  place-items: end center;
-}
-.face .ghost {
-  --gs: 0.28;
-}
-.face b {
-  font-family: var(--display);
-  font-size: 0.8rem;
-}
-.face small {
-  font-size: 0.6rem;
-  color: var(--sage);
-  font-weight: 700;
-}
-.face small.off {
-  color: var(--muted);
+.dots i.is-on {
+  background: var(--coral);
+  height: 32px;
 }
 
-/* --- strict mode: apps going dark ------------------------------------- */
+/* --- strict mode --------------------------------------------------------- */
 
 .strict__in {
   display: grid;
-  grid-template-columns: 1fr 400px;
-  gap: clamp(32px, 6vw, 84px);
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(40px, 6vw, 88px);
   align-items: center;
 }
-.grid-apps {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: clamp(18px, 3vw, 30px) clamp(14px, 2.4vw, 26px);
-  padding: clamp(24px, 3.4vw, 34px);
-  background: var(--well);
-  border: 1px solid var(--line);
-  border-radius: 30px;
+.strict h2 {
+  margin-bottom: 18px;
 }
-/* Tiles are bare like a real home screen — the coloured squircle IS the icon, so
-   no card behind it. */
+.ticks {
+  list-style: none;
+  padding: 0;
+  margin: 24px 0 0;
+  display: grid;
+  gap: 10px;
+}
+.ticks li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.ticks svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  padding: 3px;
+  margin-top: 1px;
+  border-radius: 50%;
+  color: #2a1512;
+  background: var(--coral);
+}
+.apps {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(12px, 2vw, 22px);
+  padding: clamp(20px, 3vw, 34px);
+  border-radius: 36px;
+  background: linear-gradient(160deg, rgb(58 50 46 / 0.6), rgb(30 24 22 / 0.7));
+  border: 1px solid rgb(255 255 255 / 0.06);
+  box-shadow: 0 40px 90px -40px rgb(0 0 0 / 0.8);
+  max-width: 420px;
+  width: 100%;
+  justify-self: center;
+}
+.apps__shield {
+  position: absolute;
+  inset: -12px;
+  border-radius: 46px;
+  border: 1.5px solid rgb(255 149 133 / 0.6);
+  box-shadow:
+    0 0 36px rgb(255 95 109 / 0.28),
+    inset 0 0 36px rgb(255 149 133 / 0.14);
+  opacity: 0;
+  pointer-events: none;
+}
 .tile {
   display: grid;
   justify-items: center;
-  align-content: start;
-  gap: 9px;
+  gap: 7px;
+  font-size: 0.74rem;
   color: var(--muted);
-  transition:
-    opacity 0.5s ease,
-    transform 0.5s cubic-bezier(0.34, 1.3, 0.64, 1);
 }
 .tile b {
-  font-size: 0.76rem;
   font-weight: 700;
-  letter-spacing: 0.01em;
-  transition:
-    color 0.5s ease,
-    opacity 0.5s ease;
 }
 .tile__ico {
   position: relative;
   width: 100%;
-  max-width: 74px;
+  max-width: 76px;
   aspect-ratio: 1;
-  /* iOS squircle is closer to a 22% continuous curve than a small radius. */
   border-radius: 24%;
-  background: linear-gradient(160deg, var(--c1, #6b7280), var(--c2, #374151));
   display: grid;
   place-items: center;
-  color: #fff;
+  color: var(--ink);
+  background: linear-gradient(150deg, #4a3f3a, #342b27);
+  border: 1px solid rgb(255 255 255 / 0.08);
+  box-shadow: 0 12px 22px -12px rgb(0 0 0 / 0.6);
+  transition: filter 0.5s ease;
+}
+.tile__ico > svg {
+  width: 44%;
+  height: 44%;
+}
+.tile--momo .tile__ico {
+  background: none;
   box-shadow:
-    0 8px 18px -8px rgb(0 0 0 / 0.7),
-    0 0 0 0.5px rgb(255 255 255 / 0.14) inset;
-  transition:
-    filter 0.55s ease,
-    opacity 0.55s ease,
-    transform 0.55s cubic-bezier(0.34, 1.3, 0.64, 1);
+    0 0 0 2px rgb(255 149 133 / 0.6),
+    0 0 26px rgb(255 95 109 / 0.45);
+  overflow: hidden;
 }
-.tile__ico svg {
-  width: 56%;
-  height: 56%;
-  stroke-width: 1.9;
-}
-.tile__ico img {
+.tile--momo img {
   width: 100%;
   height: 100%;
-  border-radius: inherit;
+  object-fit: cover;
 }
-
-/* The lock badge rides the icon's corner, and is deliberately left out of the
-   dimming below — it's the one thing that has to stay legible. */
 .tile__lock {
   position: absolute;
-  right: -7px;
-  top: -7px;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: var(--rose);
-  color: #241816;
+  inset: 0;
   display: grid;
   place-items: center;
-  box-shadow: 0 3px 8px rgb(0 0 0 / 0.55);
+  border-radius: inherit;
+  background: rgb(20 16 14 / 0.6);
   opacity: 0;
-  transform: scale(0.3);
-  transition:
-    opacity 0.3s ease,
-    transform 0.45s cubic-bezier(0.3, 1.6, 0.4, 1);
 }
 .tile__lock svg {
-  width: 15px;
-  height: 15px;
-  stroke-width: 2.1;
-}
-
-.tile.is-blocked .tile__ico {
-  filter: grayscale(1) brightness(0.5);
-  transform: scale(0.94);
-}
-.tile.is-blocked b {
-  opacity: 0.4;
-}
-.tile.is-blocked .tile__lock {
-  opacity: 1;
-  transform: none;
-}
-
-/* Momo stays lit — it's the one app the session doesn't lock you out of. */
-.tile--momo b {
+  width: 38%;
+  height: 38%;
   color: var(--coral);
 }
-.tile--momo.is-lit .tile__ico {
-  box-shadow:
-    0 8px 22px -6px rgb(0 0 0 / 0.7),
-    0 0 0 3px color-mix(in srgb, var(--coral) 40%, transparent);
+.apps.is-locked .tile:not(.tile--momo) .tile__ico {
+  filter: grayscale(0.85) brightness(0.8);
 }
 
-/* --- streak calendar ---------------------------------------------------- */
+/* --- buddies ------------------------------------------------------------- */
 
-.cal {
+.lab {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
-  max-width: 340px;
+  grid-template-columns: 1.1fr 1fr;
+  gap: clamp(24px, 4vw, 52px);
+  align-items: center;
 }
-.cal i {
-  aspect-ratio: 1;
-  border-radius: 10px;
-  background: var(--alt);
-  border: 1px solid var(--line);
+.lab__stage {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 16px;
 }
-.cal i.on {
-  background: var(--sage);
-  border-color: var(--sage);
+.view--lab {
+  width: 100%;
+  aspect-ratio: 1 / 0.82;
+  max-height: 60vh;
+  border-radius: 32px;
+  background: radial-gradient(closest-side, rgb(255 149 133 / 0.18), transparent);
 }
-.cal i.today {
-  background: var(--coral);
-  border-color: var(--coral);
+.lab__acts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
 }
-
-/* --- closing + footer -------------------------------------------------- */
-
-.close {
+.lab__say {
+  min-height: 1.5em;
+  color: var(--muted);
   text-align: center;
-  padding-block: clamp(100px, 16vh, 180px);
+  font-weight: 700;
+  font-size: 0.92rem;
 }
-.close h2 {
-  font-size: clamp(2.4rem, 6.4vw, 4.2rem);
-  margin-bottom: 20px;
+.roster {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
 }
-.close .lede {
-  margin-inline: auto;
+.buddy {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px 6px 6px;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: rgb(255 255 255 / 0.025);
+  cursor: pointer;
+  text-align: left;
+  transition:
+    border-color 0.3s ease,
+    background 0.3s ease,
+    transform 0.4s var(--ease),
+    box-shadow 0.4s ease;
 }
-.close__cta {
+/* A live 3D slot, drawn by the shared canvas. */
+.buddy__view,
+.board__av,
+.room__av {
+  display: block;
+  flex: none;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(255 149 133 / 0.16), transparent);
+}
+.buddy__view {
+  width: 60px;
+  height: 60px;
+}
+.buddy b {
+  display: block;
+  font-family: var(--display);
+  font-size: 1.02rem;
+  line-height: 1.1;
+}
+.buddy small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+.buddy:hover {
+  transform: translateY(-1px);
+  border-color: rgb(255 149 133 / 0.5);
+}
+.buddy.is-on {
+  border-color: var(--coral);
+  background: rgb(255 149 133 / 0.08);
+  box-shadow: 0 14px 34px -18px var(--blush);
+}
+
+.lab__side {
+  display: grid;
+  gap: 14px;
+}
+/* The next buddy: live behind frosted glass, only its glow coming through. The glass sits over the
+   WebGL canvas (z-index above it), so backdrop-filter blurs the 3D itself. */
+.tease {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 18px 10px 10px;
+  border-radius: 22px;
+  border: 1px dashed var(--line);
+}
+.tease__frame {
+  position: relative;
+  flex: none;
+  width: 92px;
+  height: 92px;
+  border-radius: 18px;
+  overflow: hidden;
+}
+.tease__view {
+  position: absolute;
+  inset: 0;
+}
+.tease__glass {
+  position: absolute;
+  inset: 0;
+  z-index: 31;
+  border-radius: inherit;
+  background: rgb(33 27 24 / 0.3);
+  backdrop-filter: blur(7px) saturate(1.2);
+  -webkit-backdrop-filter: blur(7px) saturate(1.2);
+  border: 1px solid rgb(255 255 255 / 0.06);
+}
+.tease b {
+  display: block;
+  font-family: var(--display);
+  font-size: 1.02rem;
+  line-height: 1.2;
+}
+.tease small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin-top: 2px;
+}
+
+/* --- streaks ------------------------------------------------------------- */
+
+.streak__in {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: clamp(32px, 6vw, 88px);
+  align-items: center;
+}
+.streak h2 {
+  margin-bottom: 18px;
+}
+.flame {
+  position: relative;
+  justify-self: center;
+  width: min(280px, 72%);
+  display: grid;
+  justify-items: center;
+}
+.flame__glow {
+  position: absolute;
+  inset: 0 -10% 10%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(255 95 109 / 0.32), transparent);
+}
+.flame__svg {
+  position: relative;
+  width: 64%;
+  transform-origin: 50% 96%;
+  filter: drop-shadow(0 0 24px rgb(255 95 109 / 0.45));
+}
+.flame__out {
+  transform-origin: 50% 96%;
+  animation: flicker 2.6s ease-in-out infinite alternate;
+}
+.flame__in {
+  transform-origin: 50% 96%;
+  animation: flicker 1.9s ease-in-out infinite alternate-reverse;
+}
+@keyframes flicker {
+  0% {
+    transform: scale(1, 1) skewX(0deg);
+  }
+  50% {
+    transform: scale(0.97, 1.04) skewX(-1.5deg);
+  }
+  100% {
+    transform: scale(1.02, 0.97) skewX(1.5deg);
+  }
+}
+.flame__n {
+  position: relative;
+  margin-top: 4px;
+  text-align: center;
+  font-family: var(--display);
+  line-height: 1;
+}
+.flame__n b {
+  display: block;
+  font-size: clamp(2.8rem, 5vw, 3.8rem);
+  background: linear-gradient(180deg, var(--peach), var(--blush));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-variant-numeric: tabular-nums;
+}
+.flame__n small {
+  font-family: var(--body);
+  color: var(--muted);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+}
+.chain {
+  margin-top: 28px;
+  display: grid;
+  grid-template-columns: repeat(14, minmax(0, 1fr));
+  gap: 7px;
+  max-width: 480px;
+}
+.chain i {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.06);
+  border: 1px solid rgb(255 255 255 / 0.08);
+  transition:
+    background 0.4s ease,
+    box-shadow 0.4s ease,
+    border-color 0.4s ease;
+}
+.chain i.is-lit {
+  background: radial-gradient(circle at 50% 35%, var(--peach), var(--blush));
+  border-color: transparent;
+  box-shadow: 0 0 12px rgb(255 95 109 / 0.45);
+}
+
+/* --- achievements -------------------------------------------------------- */
+
+.badges {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: clamp(10px, 1.6vw, 18px);
+  perspective: 900px;
+}
+.badge {
+  position: relative;
+  padding: 18px 12px;
+  border-radius: var(--r-card);
+  background: linear-gradient(170deg, rgb(58 50 46 / 0.55), rgb(35 29 26 / 0.55));
+  border: 1px solid rgb(255 255 255 / 0.06);
+  text-align: center;
+  transform-style: preserve-3d;
+  overflow: hidden;
+}
+.badge::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 35%, rgb(246 237 228 / 0.12) 50%, transparent 65%);
+  transform: translateX(-120%);
+  transition: transform 0.9s var(--ease);
+  pointer-events: none;
+}
+.badge:hover::after,
+.badge.is-shine::after {
+  transform: translateX(120%);
+}
+/* Badge art is square: always shown square, whole, never stretched or cropped. */
+.badge__art {
+  display: block;
+  width: 72%;
+  max-width: 128px;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: contain;
+  margin: 0 auto 10px;
+  filter: drop-shadow(0 10px 18px rgb(0 0 0 / 0.3));
+}
+.badge b {
+  display: block;
+  font-family: var(--display);
+  font-size: 0.98rem;
+  line-height: 1.15;
+}
+.badge small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.4;
+  margin-top: 4px;
+}
+
+/* --- friends ------------------------------------------------------------- */
+
+.duo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(14px, 2vw, 24px);
+}
+.panel {
+  border-radius: 28px;
+  padding: clamp(18px, 2.6vw, 30px);
+  background: linear-gradient(170deg, rgb(58 50 46 / 0.55), rgb(30 24 22 / 0.65));
+  border: 1px solid rgb(255 255 255 / 0.06);
+}
+.panel__hd {
   display: flex;
   gap: 12px;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-top: 34px;
+  align-items: flex-start;
+  margin-bottom: 20px;
 }
-.close__fine {
-  margin-top: 20px;
-  font-size: 0.84rem;
+.panel__hd p {
   color: var(--muted);
+  font-size: 0.9rem;
+  margin-top: 2px;
 }
+.panel__ico {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: var(--coral);
+  background: rgb(255 149 133 / 0.12);
+}
+.panel__ico svg {
+  width: 20px;
+  height: 20px;
+}
+.board {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.board li {
+  display: grid;
+  grid-template-columns: 18px 48px 56px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 4px 12px 4px 8px;
+  border-radius: 16px;
+  background: rgb(255 255 255 / 0.025);
+  font-size: 0.9rem;
+}
+.board li.is-you {
+  background: rgb(255 149 133 / 0.08);
+  box-shadow: inset 0 0 0 1px rgb(255 149 133 / 0.35);
+}
+.board__r {
+  font-family: var(--mono);
+  color: var(--muted);
+  text-align: center;
+  font-size: 0.8rem;
+}
+.board__av {
+  width: 48px;
+  height: 48px;
+}
+.board b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.board__bar {
+  height: 6px;
+  border-radius: 3px;
+  background: rgb(255 255 255 / 0.06);
+  overflow: hidden;
+}
+.board__bar i {
+  display: block;
+  height: 100%;
+  width: var(--w);
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgb(255 149 133 / 0.45), var(--coral));
+  transform-origin: 0 50%;
+}
+.board__v {
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  white-space: nowrap;
+}
+.room {
+  border-radius: 20px;
+  padding: 16px;
+  background: rgb(26 20 17 / 0.5);
+}
+.room__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+}
+.room__code {
+  font-family: var(--mono);
+  letter-spacing: 0.18em;
+  padding: 4px 9px;
+  border-radius: 9px;
+  background: rgb(255 255 255 / 0.06);
+}
+.room__live {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--coral);
+  font-weight: 700;
+}
+.room__live i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--blush);
+  animation: ping 2.4s ease-out infinite;
+}
+.room__clock {
+  text-align: center;
+  font-family: var(--mono);
+  font-size: clamp(2rem, 3.6vw, 2.6rem);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  margin: 8px 0 4px;
+  text-shadow: 0 0 26px rgb(255 95 109 / 0.4);
+}
+.room__peers {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
+}
+.room__peers figure {
+  margin: 0;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-align: center;
+}
+.room__av {
+  width: 100%;
+  max-width: 76px;
+  aspect-ratio: 1;
+  height: auto;
+}
+.room__peers .is-out figcaption {
+  color: var(--peach);
+}
+.room__note {
+  margin-top: 12px;
+  font-size: 0.82rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* --- join ---------------------------------------------------------------- */
+
+.join {
+  position: relative;
+  padding-block: clamp(64px, 10vh, 120px) var(--bay);
+  text-align: center;
+}
+.join__in {
+  display: grid;
+  justify-items: center;
+}
+.view--join {
+  width: min(300px, 74vw);
+  aspect-ratio: 1;
+  margin-bottom: 4px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(255 149 133 / 0.24), transparent);
+}
+.join h2 {
+  margin-bottom: 14px;
+}
+.join .lede {
+  margin-inline: auto;
+}
+.join .wl {
+  width: 100%;
+}
+.facts {
+  margin-top: 22px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 18px;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+.facts span + span::before {
+  content: '·';
+  margin-right: 18px;
+  opacity: 0.6;
+}
+
+/* --- footer -------------------------------------------------------------- */
 
 .ft {
   border-top: 1px solid var(--line);
-  padding-block: 44px 52px;
+  padding-block: 40px 48px;
 }
 .ft__in {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px 32px;
+  gap: 18px 30px;
   align-items: center;
 }
 .ft nav {
   display: flex;
-  gap: 24px;
+  gap: 22px;
   flex-wrap: wrap;
   margin-left: auto;
 }
 .ft a {
   color: var(--muted);
   text-decoration: none;
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   transition: color 0.2s ease;
 }
 .ft a:hover {
   color: var(--coral);
 }
+.ft .mark {
+  color: var(--ink);
+  font-size: 1.15rem;
+}
 .ft__note {
   width: 100%;
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
 }
 
-/* --- reveal -------------------------------------------------------------
-   Nothing here may be the only reason text is visible. Copy is visible by
-   default; main.js adds `.anim` to <html> only once GSAP has actually loaded,
-   and only then does anything start hidden. CDN down, JS blocked, script
-   error — the page still reads.
-   ---------------------------------------------------------------------- */
+/* --- reveal ---------------------------------------------------------------
+   Copy is visible by default; main.js adds .anim to <html> only once GSAP has
+   loaded, and only then does anything start hidden. */
 
 .anim .rise {
   opacity: 0;
-  transform: translateY(26px);
+  transform: translateY(22px);
 }
 .anim .rise.is-in {
   opacity: 1;
   transform: none;
   transition:
     opacity 0.8s ease,
-    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+    transform 1s var(--ease);
 }
 
-/* Headline stagger is pure CSS — no tween to stall, no JS to fail. */
-.word {
-  display: inline-block;
-  animation: word-in 0.85s cubic-bezier(0.16, 1, 0.3, 1) backwards;
-  animation-delay: calc(var(--i, 0) * 0.06s + 0.12s);
-}
-@keyframes word-in {
-  from {
-    opacity: 0;
-    transform: translateY(0.5em) rotate(3deg);
-  }
-}
-
-/* --- legal pages -------------------------------------------------------- */
+/* --- legal pages --------------------------------------------------------- */
 
 .legal {
   padding-top: 128px;
@@ -1673,7 +1464,7 @@ p {
   max-width: 760px;
 }
 .legal h1 {
-  font-size: clamp(2.3rem, 5.6vw, 3.4rem);
+  font-size: clamp(2.2rem, 5vw, 3.2rem);
   margin-bottom: 14px;
 }
 .legal__meta {
@@ -1742,404 +1533,167 @@ p {
   margin-bottom: 0;
 }
 
-/* --- responsive --------------------------------------------------------- */
+/* --- responsive ---------------------------------------------------------- */
 
-/* --- the room (multiplayer) ---------------------------------------------
-   A screen inside the phone, like every other beat of the story: your buddy in
-   a progress ring, everyone else in a row underneath, the shared 3-2-1 over the
-   top of it.
-   ---------------------------------------------------------------------- */
-
-.screen--room {
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  overflow: hidden;
-}
-.room__bar {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-.room__code {
-  font-family: var(--mono);
-  font-size: 0.86rem;
-  letter-spacing: 3px;
-  color: var(--coral);
-  background: var(--coral-soft);
-  border-radius: var(--r-pill);
-  padding: 4px 12px;
-}
-.room__live {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--muted);
-}
-.room__live i {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--sage);
-  box-shadow: 0 0 0 0 color-mix(in srgb, var(--sage) 60%, transparent);
-  animation: room-pulse 2.2s ease-out infinite;
-}
-@keyframes room-pulse {
-  0% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--sage) 60%, transparent);
-  }
-  70%,
-  100% {
-    box-shadow: 0 0 0 9px transparent;
+@media (max-width: 1080px) {
+  .badges {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
-/* Ring + buddy + clock, stacked in one square — the app's own composition. */
-.room__me {
-  position: relative;
-  width: min(230px, 100%);
-  aspect-ratio: 1;
-  display: grid;
-  place-items: center;
-}
-.ring {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  transform: rotate(-90deg);
-}
-.ring__track,
-.ring__fill {
-  fill: none;
-  stroke-width: 7;
-  stroke-linecap: round;
-}
-.ring__track {
-  stroke: var(--coral-soft);
-}
-.ring__fill {
-  stroke: var(--coral);
-  /* r=54 → 2πr ≈ 339.3. Drawn as one dash whose offset is the remaining arc. */
-  stroke-dasharray: 339.3;
-  stroke-dashoffset: 130;
-}
-.anim .ring__fill {
-  animation: ring-fill 14s linear infinite;
-}
-@keyframes ring-fill {
-  from {
-    stroke-dashoffset: 339.3;
-  }
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-.room__me .ghost {
-  --gs: 0.46;
-  transform: translateY(-10px);
-}
-.room__t {
-  position: absolute;
-  bottom: 14px;
-  font-family: var(--display);
-  font-size: 1.4rem;
-  font-variant-numeric: tabular-nums;
-}
-.room__peers {
-  justify-content: center;
-}
-.room__peers .face > div {
-  height: 66px;
-}
-.room__peers .face .ghost {
-  --gs: 0.2;
-}
-.face.is-out {
-  opacity: 0.45;
-}
-.face small.bad {
-  color: var(--rose);
-}
-
-/* The shared 3-2-1, laid over the panel and gone once it has played. */
-.room__count {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  background: color-mix(in srgb, var(--surface) 88%, transparent);
-  backdrop-filter: blur(2px);
-  font-family: var(--display);
-  font-size: 5.5rem;
-  line-height: 1;
-  color: var(--ink);
-  transition:
-    opacity 0.45s ease,
-    visibility 0.45s;
-}
-.room__count[hidden] {
-  display: none;
-}
-.room__count.is-done {
-  opacity: 0;
-  visibility: hidden;
-}
-
-/* --- stats -------------------------------------------------------------- */
-
-.stats__in {
-  display: grid;
-  grid-template-columns: 300px minmax(0, 620px);
-  gap: clamp(24px, 4vw, 48px);
-  align-items: start;
-}
-.statgrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-.stat {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--r-chip);
-  padding: 16px 18px;
-  display: grid;
-  gap: 2px;
-}
-.stat b {
-  font-family: var(--display);
-  font-size: 1.5rem;
-  line-height: 1.1;
-  font-variant-numeric: tabular-nums;
-}
-.stat small {
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-.stat--streak b {
-  color: var(--gold);
-}
-.stat--split {
-  grid-column: 1 / -1;
-  gap: 8px;
-}
-.split {
-  display: flex;
-  height: 10px;
-  border-radius: var(--r-pill);
-  overflow: hidden;
-  background: var(--alt);
-}
-.split i {
-  width: var(--w);
-}
-.split__solo {
-  background: var(--coral);
-}
-.split__duo {
-  background: var(--sage);
-}
-.split__k {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--muted);
-}
-.split__k em {
-  width: 9px;
-  height: 9px;
-  border-radius: 3px;
-  display: inline-block;
-}
-.k-solo {
-  background: var(--coral);
-}
-.k-duo {
-  background: var(--sage);
-}
-
-.panel {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--r-card);
-  box-shadow: var(--shadow-sm);
-  padding: 18px 20px 20px;
-}
-.panel__hd {
-  font-family: var(--display);
-  font-size: 1.05rem;
-  margin: 0 0 10px;
-}
-.heatwrap {
-  background: var(--well);
-  border-radius: var(--r-chip);
-  padding: 4px 0 10px;
-}
-/* The section's own heatmap sits in a well, so it drops the card's inner padding. */
-.heatwrap .heat {
-  padding: 14px 14px 8px;
-  gap: 4px;
-}
-/* Wide-and-short cells, like the app's — a square grid at this width reads as swatches.
-   Cold cells mix toward --well, not --alt: against the panel the --alt end sits too close in
-   luminance to the hot end, and the whole grid flattens into one brown wash. */
-.heatwrap .heat i {
-  aspect-ratio: auto;
-  height: 24px;
-  background: color-mix(in srgb, var(--coral) calc(var(--v) * 1%), var(--well));
-}
-.heat__ax {
-  display: flex;
-  justify-content: space-between;
-  padding-inline: 16px;
-  font-family: var(--mono);
-  font-size: 0.66rem;
-  color: var(--muted);
-}
-.legend {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 6px;
-  padding-top: 10px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--muted);
-}
-.legend i {
-  width: 16px;
-  height: 12px;
-  border-radius: 3px;
-  background: color-mix(in srgb, var(--coral) calc(var(--v) * 1%), var(--alt));
-}
-
-@media (max-width: 1040px) {
+@media (max-width: 960px) {
   .hero__in,
   .strict__in,
-  .stats__in {
+  .streak__in,
+  .lab,
+  .duo {
     grid-template-columns: 1fr;
-    gap: 28px;
   }
-  /* One viewport is a desktop luxury. On a phone, forcing it pushed the download
-     button clean below the fold, so the hero is content-height instead and the
-     dial shrinks to leave room for the CTA. */
   .hero {
     min-height: 0;
-    padding-top: 92px;
-    padding-bottom: 7vh;
+    padding-top: calc(var(--hdr) + 4px);
   }
-  .hero__in {
-    flex: none;
-  }
-  .hero .dial {
-    order: -1;
-    width: min(248px, 62vw);
-  }
-  .dial .ghost {
-    --gs: 0.62;
-  }
-  .hero .cue {
-    padding-top: 34px;
-  }
-  /* Smaller dial closes the gap between the buddy's hem and the label; drop the
-     label nearer the ring to keep them apart. */
-  .dial__time {
-    bottom: 8%;
-    font-size: 0.8rem;
-  }
-
-  .story__in {
-    grid-template-columns: 1fr;
-  }
-  /* Sticky phone is a desktop affordance. On small screens it sits inline,
-     once, on the session beat — see main.js `desktop`. */
-  .rail {
-    position: static;
-    height: auto;
-    padding-block: 6vh;
-  }
-  /* Nothing is pinned down here, so the tail would just be dead space. */
-  .acts {
-    padding-bottom: 0;
-  }
-  .act {
-    min-height: 0;
-    padding-block: 5vh;
-  }
-  /* Both of these were sized for the desktop side-column. Once the layout
-     stacks they get the full content width, so the caps just stranded them in a
-     sea of empty space — let them use the room they now have. */
-  .grid-apps {
-    max-width: none;
-  }
-  .tile__ico {
-    max-width: 104px;
-  }
-  .cal {
-    max-width: none;
-    /* Capped per cell rather than per row: 7 free-growing columns across a
-       tablet-width container would render 130px calendar squares. */
-    grid-template-columns: repeat(7, minmax(0, 104px));
-  }
-  /* Heading before the calendar once the two columns stack — the grid's source
-     order puts the calendar first, which reads as an orphan on a phone. */
-  .story__in > .cal {
+  .hero__copy {
     order: 2;
   }
-
-  /* Touch expects to swipe a shelf, not to have it dragged by vertical scroll.
-     Native overflow with snap here; the GSAP scrub is desktop-only (main.js). */
-  .shelf {
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scroll-snap-type: x proximity;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
+  .hero__stage {
+    order: 1;
+    max-width: 420px;
   }
-  .shelf::-webkit-scrollbar {
+  .badges {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .roster {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+
+  /* How it works on a phone: the stage up top, the step under it. */
+  .how__in {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    align-content: center;
+    height: 100%;
+  }
+  .how__copy {
+    order: 2;
+  }
+  .how__stage {
+    order: 1;
+    height: 50svh;
+  }
+  .how__title,
+  .how .eyebrow {
     display: none;
   }
-  .belt > * {
-    scroll-snap-align: center;
+  .step h3 {
+    font-size: 1.35rem;
+    margin: 4px 0 6px;
   }
-  /* Trailing gutter, so the last card doesn't butt against the screen edge. */
-  .belt::after {
-    content: '';
-    flex: none;
-    width: 1px;
+  .step p {
+    font-size: 0.95rem;
+  }
+  .dots {
+    right: auto;
+    left: 50%;
+    top: auto;
+    bottom: -22px;
+    transform: translateX(-50%);
+    grid-auto-flow: column;
+  }
+  .dots i {
+    width: 18px;
+    height: 4px;
+  }
+  .dots i.is-on {
+    width: 30px;
+    height: 4px;
+  }
+  .app {
+    width: 40px;
+    height: 40px;
+    margin: -20px 0 0 -20px;
+    border-radius: 12px;
+  }
+  .app svg {
+    width: 20px;
+    height: 20px;
   }
 }
 
 @media (max-width: 560px) {
-  .statgrid {
-    grid-template-columns: 1fr 1fr;
+  h1 {
+    font-size: 2.2rem;
   }
-  .stat b {
-    font-size: 1.28rem;
+  h2 {
+    font-size: 1.75rem;
   }
-
-  body {
-    font-size: 16px;
+  .hdr__cta .wide {
+    display: none;
+  }
+  .hero__stage {
+    max-width: 340px;
+  }
+  .hud-chip {
+    font-size: 0.72rem;
+    padding: 6px 10px;
+  }
+  .hud-chip b {
+    font-size: 0.88rem;
+  }
+  .hud-chip--coins {
+    left: 2%;
+  }
+  .hud-chip--streak {
+    right: 0;
+  }
+  .wl__row {
+    flex-direction: column;
+    border-radius: 22px;
+  }
+  .wl__btn {
+    width: 100%;
+  }
+  .wl__input {
+    padding: 11px 14px;
+  }
+  .badges {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .chain {
+    gap: 4px;
+  }
+  .board li {
+    grid-template-columns: 16px 42px minmax(0, 1fr) auto;
+    row-gap: 4px;
+    padding-block: 6px;
+  }
+  .board__r,
+  .board__av {
+    grid-row: 1 / 3;
+  }
+  .board__av {
+    width: 42px;
+    height: 42px;
+  }
+  .board b {
+    grid-area: 1 / 3;
+  }
+  .board__v {
+    grid-area: 1 / 4;
+  }
+  .board__bar {
+    grid-area: 2 / 3 / 3 / 5;
+  }
+  .roster {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .buddy__view {
+    width: 52px;
+    height: 52px;
   }
   .legal {
     padding-top: 104px;
-  }
-  /* True phone width: let the week fill the column edge to edge. */
-  .cal {
-    grid-template-columns: repeat(7, minmax(0, 1fr));
-  }
-  .tile__ico {
-    max-width: 78px;
   }
   .legal table {
     font-size: 0.88rem;
@@ -2147,43 +1701,6 @@ p {
   .legal th,
   .legal td {
     padding: 9px 10px;
-  }
-  .phone {
-    --pw: 268px;
-  }
-  .dial .ghost {
-    --gs: 0.7;
-  }
-  /* Full-width only for the page's own CTA stacks — a blanket rule on .btn also
-     hit the header button and pushed the whole layout sideways. */
-  .hero__cta .btn,
-  .close__cta .btn {
-    width: 100%;
-  }
-  .hero__cta,
-  .close__cta {
-    flex-direction: column;
-  }
-  .feat .card {
-    width: 280px;
-    padding: 22px;
-  }
-  .cast .card {
-    width: 172px;
-  }
-  .cast__art {
-    height: 132px;
-  }
-  .cast .card .ghost {
-    --gs: 0.4;
-  }
-  .cast__art img {
-    max-height: 118px;
-  }
-  .grid-apps {
-    gap: 12px;
-    padding: 18px;
-    border-radius: 24px;
   }
 }
 
@@ -2195,14 +1712,29 @@ p {
     animation-iteration-count: 1 !important;
     transition-duration: 0.001s !important;
   }
-  /* Hold the sprite on its first frame rather than flashing one cycle. */
-  .ghost {
-    animation: none !important;
-    background-position: 0% 0% !important;
-  }
-  .anim .rise,
-  .word {
+  .anim .rise {
     opacity: 1 !important;
     transform: none !important;
+  }
+  /* No scroll-driven story: the four steps simply stack. */
+  .how {
+    height: auto;
+  }
+  .how__sticky {
+    position: relative;
+    height: auto;
+    padding-block: var(--bay);
+  }
+  .steps {
+    gap: 24px;
+  }
+  .step {
+    grid-area: auto;
+    opacity: 1;
+    transform: none;
+  }
+  .how__stage,
+  .dots {
+    display: none;
   }
 }

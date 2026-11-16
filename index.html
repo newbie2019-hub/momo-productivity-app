@@ -1,9 +1,11 @@
+<!doctype html>
+<html lang="en">
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Momo: Pomodoro Gamified</title>
 <meta
   name="description"
-  content="Momo is a pomodoro timer with a small ghost living inside it. It works while you work, celebrates when you finish, and droops when you wander off."
+  content="Momo blocks the apps that pull you away and turns every focus session into a game. Earn coins, build streaks, unlock achievements and climb the leaderboard with friends."
 />
 <meta name="theme-color" content="#231D1A" />
 <link rel="canonical" href="https://momo-pomodoro.cloud/" />
@@ -15,7 +17,7 @@
 <meta property="og:title" content="Momo: Pomodoro Gamified" />
 <meta
   property="og:description"
-  content="Start a session and your buddy gets to work beside you. Finish and it celebrates. Wander off and it droops."
+  content="Momo blocks the apps that pull you away and turns every focus session into a game. Earn coins, build streaks, unlock achievements and climb the leaderboard with friends."
 />
 <meta property="og:image" content="https://momo-pomodoro.cloud/assets/img/og.png" />
 <meta property="og:image:width" content="1200" />
@@ -25,681 +27,480 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 <link
-  href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700&family=Nunito:wght@400;700&family=DM+Mono:wght@400;500&display=swap"
+  href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;700;800&family=DM+Mono:wght@400;500&display=swap"
   rel="stylesheet"
 />
 <link rel="stylesheet" href="styles.css" />
+<!-- The import map must come before anything that loads a module (modulepreload included):
+     Firefox and Safari ignore a map that arrives after the first module load. -->
+<script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.187.0/examples/jsm/",
+      "three/examples/jsm/": "https://cdn.jsdelivr.net/npm/three@0.187.0/examples/jsm/",
+      "cannon-es": "https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js"
+    }
+  }
+</script>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.js" crossorigin />
+<link rel="preload" href="assets/models/ghost.glb" as="fetch" crossorigin />
 
-<a class="skip" href="#story">Skip to the features</a>
 
-<!-- Icon sprite: one definition per glyph, referenced with <use>. Line icons,
-     drawn here rather than pulled from an icon font — no extra request, and they
-     inherit currentColor so they sit inside the palette. -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+
+<a class="skip" href="#how">Skip to how it works</a>
+
+<!-- Icon sprite: line icons that inherit currentColor. -->
+<svg width="0" height="0" style="position: absolute" aria-hidden="true">
   <defs>
-    <g id="i-lock" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+    <g id="i-lock" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
       <rect x="4" y="10.5" width="16" height="10.5" rx="3" />
       <path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" />
     </g>
-    <g id="i-clock" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
-      <circle cx="12" cy="12" r="8.4" />
-      <path d="M12 7.6V12l3 2" />
+    <g id="i-shield" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3l7.5 3v5.5c0 4.6-3.2 8.2-7.5 9.5-4.3-1.3-7.5-4.9-7.5-9.5V6z" />
+      <path d="M9 12l2.2 2.2L15.5 10" />
     </g>
-    <g id="i-chart" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
-      <path d="M4 20h16" />
-      <path d="M7 20v-6M12 20V6M17 20v-9" />
+    <g id="i-flame" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 21.5c3.9 0 6.5-2.6 6.5-6.1 0-3.9-3-6.6-4.3-10.9-2.4 1.6-3.6 4-3.5 6.4-1.3-.8-2-2.2-2.1-3.6C7 9.4 5.5 12 5.5 15.4c0 3.5 2.6 6.1 6.5 6.1z" />
+      <path d="M12 21.5c-1.7 0-2.8-1.2-2.8-2.8 0-1.9 1.6-3 2.8-4.9 1.2 1.9 2.8 3 2.8 4.9 0 1.6-1.1 2.8-2.8 2.8z" />
     </g>
-    <g id="i-plane" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
-      <path d="M4 13.5l16-6-6 13-2.4-5.2z" />
+    <g id="i-timer" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="13" r="8" />
+      <path d="M12 9v4l2.5 1.5M9.5 2.5h5" />
     </g>
-    <g id="i-users" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+    <g id="i-sparkle" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3.5l1.9 5.1 5.1 1.9-5.1 1.9L12 17.5l-1.9-5.1L5 10.5l5.1-1.9z" />
+      <path d="M18.5 16v4M16.5 18h4" />
+    </g>
+    <g id="i-coin" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+      <circle cx="12" cy="12" r="8.5" />
+      <circle cx="12" cy="12" r="5.6" />
+      <path d="M10.4 11.2h.01M13.6 11.2h.01M10.4 13.6c.9.8 2.3.8 3.2 0" />
+    </g>
+    <g id="i-trophy" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M7.5 4h9v5a4.5 4.5 0 0 1-9 0z" />
+      <path d="M7.5 6H4.5a3 3 0 0 0 3 4M16.5 6h3a3 3 0 0 1-3 4M12 13.5V17M8.5 20.5h7M9.5 17h5v3.5h-5z" />
+    </g>
+    <g id="i-users" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
       <circle cx="9" cy="9" r="3.2" />
       <path d="M3.5 19.5c0-3 2.5-4.8 5.5-4.8s5.5 1.8 5.5 4.8" />
       <path d="M16 6.4a3 3 0 0 1 0 5.6M17.5 15.2c2 .6 3.2 2.1 3.2 4.3" />
     </g>
-    <g id="i-medal" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
-      <circle cx="12" cy="14.5" r="5.5" />
-      <path d="M9 9L7 3.5h10L15 9" />
+    <g id="i-play" fill="currentColor"><path d="M8 5.4l11.5 6.6L8 18.6z" /></g>
+    <g id="i-check" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 12.5l4.5 4.5L19 7.5" />
     </g>
-    <g id="i-flame" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
-      <path d="M12 21c3.6 0 6-2.3 6-5.5C18 11 12 3 12 3S6 11 6 15.5C6 18.7 8.4 21 12 21z" />
-    </g>
-    <g id="i-chat" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+    <g id="i-x" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11" /></g>
+    <g id="i-chat" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
       <path d="M20 12.5c0 3.6-3.6 6.5-8 6.5a9 9 0 0 1-2.6-.4L5 20l1.2-3.2A6.2 6.2 0 0 1 4 12.5C4 8.9 7.6 6 12 6s8 2.9 8 6.5z" />
     </g>
-    <g id="i-play" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+    <g id="i-video" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
       <rect x="3.5" y="5.5" width="17" height="13" rx="3" />
       <path d="M11 10l3.5 2-3.5 2z" />
     </g>
-    <g id="i-game" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+    <g id="i-game" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
       <rect x="2.6" y="7.5" width="18.8" height="9.5" rx="4.5" />
       <path d="M7 10.6v2.8M5.6 12h2.8M15.5 11.4h.01M17.8 13.4h.01" />
     </g>
-    <g id="i-cart" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+    <g id="i-cart" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
       <path d="M4 5h2l2 9h9l2-6.5H7" />
       <circle cx="9.5" cy="18" r="1.4" />
       <circle cx="16.5" cy="18" r="1.4" />
     </g>
-    <g id="i-news" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+    <g id="i-news" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
       <rect x="3.6" y="5" width="16.8" height="14" rx="2.6" />
       <path d="M7 9h6M7 12.5h10M7 16h10" />
     </g>
-    <g id="i-music" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
-      <circle cx="7" cy="17.5" r="2.5" />
-      <circle cx="17" cy="15.5" r="2.5" />
-      <path d="M9.5 17.5V7l10-2v10.5" />
-    </g>
-    <g id="i-mail" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
-      <rect x="3.4" y="5.6" width="17.2" height="12.8" rx="2.6" />
-      <path d="M4 7.5l8 5.5 8-5.5" />
-    </g>
-    <g id="i-camera" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+    <g id="i-camera" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
       <rect x="3.4" y="7" width="17.2" height="12" rx="3" />
       <circle cx="12" cy="13" r="3.2" />
       <path d="M9 7l1.2-2h3.6L15 7" />
     </g>
+    <g id="i-music" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+      <circle cx="7" cy="17.5" r="2.5" />
+      <circle cx="17" cy="15.5" r="2.5" />
+      <path d="M9.5 17.5V7l10-2v10.5" />
+    </g>
+    <g id="i-mail" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+      <rect x="3.4" y="5.6" width="17.2" height="12.8" rx="2.6" />
+      <path d="M4 7.5l8 5.5 8-5.5" />
+    </g>
   </defs>
 </svg>
 
-<header class="hdr" id="hdr">
+<!-- One WebGL canvas for every live buddy on the page. Each [data-view] slot below is a window the
+     renderer draws into (scissored), so there is one context, and nothing renders while no slot is
+     on screen. Small [data-buddy] slots (roster, leaderboard, room) are drawn the same way.
+     Behind it: .ambient, the one soft backdrop whose glow main.js eases to each section's data-glow. -->
+<div class="ambient" id="ambient" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+<canvas class="gl" id="gl" aria-hidden="true"></canvas>
+
+<header class="hdr hdr--clear" id="hdr">
   <div class="wrap hdr__in">
-    <a class="mark" href="./"><img src="assets/img/icon.webp" alt="" />momo</a>
-    <!-- The clock is the scroll position, told in the product's own units. -->
-    <div class="hdr__clock" id="clock" aria-hidden="true">25:00 left</div>
-    <a class="btn btn--primary btn--sm hdr__cta" href="#get">Get Momo</a>
+    <a class="mark" href="./" aria-label="Momo, back to top"><img src="assets/img/icon.webp" alt="" /><span class="mark__word" id="markWord">momo</span></a>
+    <nav class="hdr__nav" aria-label="Sections">
+      <a href="#strict"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-shield" /></svg>Strict Mode</a>
+      <a href="#how"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-timer" /></svg>How it works</a>
+      <a href="#achievements"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-trophy" /></svg>Achievements</a>
+      <a href="#buddies"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sparkle" /></svg>Buddies</a>
+    </nav>
+    <a class="btn btn--primary btn--sm hdr__cta" href="#join"><span>Join<span class="wide"> the waitlist</span></span></a>
   </div>
-  <div class="hdr__bar" id="bar" aria-hidden="true"></div>
 </header>
 
 <main>
   <!-- ===================== hero ===================== -->
-  <section class="hero">
+  <section class="hero" id="top">
     <div class="wrap hero__in">
       <div class="hero__copy">
-        <!-- 00:00 is the page's own device: the site is one session, and this is
-             where it starts. Same eyebrow language as every act below. -->
-        <p class="stamp">00:00 — press start</p>
-        <!-- The changing word is the product's whole idea, so it gets the size. -->
-        <h1 id="h1">
-          <span class="pre">Focus doesn't have to be</span>
-          <span class="cycler" id="cycler" aria-label="boring"></span>
+        <p class="pill rise"><span class="pill__dot"></span>iOS only · launching 1 December 2026</p>
+        <h1 class="hero__h1" id="h1">
+          <span class="line"><span>Focus doesn't have</span></span>
+          <span class="line"><span>to be <span class="hot">hard.</span></span></span>
         </h1>
         <p class="lede rise">
-          It can be a game you actually want to win. Press start, stay put, and a small ghost works
-          the session out beside you — win it and you both level up. Walk out and it's a loss you can
-          see on its face.
+          Momo blocks the apps that pull you away and turns every focus session into a game. Earn
+          coins, build streaks, unlock achievements and climb the leaderboard with friends.
         </p>
-        <div class="hero__cta rise">
-          <a class="btn btn--primary" href="#get">Download for iOS</a>
-          <span class="btn btn--soon" aria-disabled="true">Android&nbsp;—&nbsp;</span>
-        </div>
-      </div>
 
-      <!-- The hero is a session you have to start. It sits in the app's pre-start
-           state until you press the button, takes the same 3-2-1, then runs. -->
-      <div class="dial" id="dial" data-state="idle">
-        <div class="dial__glow"></div>
-        <span class="spark"></span><span class="spark"></span><span class="spark"></span>
-        <svg class="dial__ring" viewBox="0 0 120 120" aria-hidden="true">
-          <circle class="dial__track" cx="60" cy="60" r="54" />
-          <circle class="dial__fill" cx="60" cy="60" r="54" />
-        </svg>
-        <div
-          class="ghost ghost--default"
-          data-state="idle"
-          role="img"
-          aria-label="Momo, a small round ghost, floating"
-        ></div>
-        <div class="dial__time" id="dialTime">25:00</div>
-
-        <div class="dial__scrim" aria-hidden="true"></div>
-        <button class="dial__start" id="dialStart" type="button">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.4l11.5 6.6L8 18.6z" /></svg>
-          Start focus
-        </button>
-        <p class="dial__count" id="dialCount" aria-hidden="true"><span>3</span></p>
-      </div>
-    </div>
-    <div class="wrap">
-      <p class="cue"><span></span>One session, start to finish</p>
-    </div>
-  </section>
-
-  <!-- ===================== the session ===================== -->
-  <!-- Phone on the left, acts on the right. Eyebrows are timestamps, not
-       01/02/03 — the order carries real meaning here. -->
-  <section class="story" id="story">
-    <div class="wrap story__in">
-      <!-- Device frame with the app's screens rebuilt from the same design tokens. -->
-      <div class="rail">
-        <div class="phone" id="phone" data-island="off">
-          <!-- Dynamic Island: expands into a Live Activity while a session runs. -->
-          <div class="notch" id="notch">
-            <div class="notch__in">
-              <div class="ghost ghost--default" data-state="busy" aria-hidden="true"></div>
-              <div class="notch__bar" id="notchBar"><i></i></div>
-              <span class="notch__t" id="notchTime">18:24</span>
-            </div>
+        <form class="wl rise" data-waitlist novalidate>
+          <label class="sr-only" for="wl-email-1">Email address</label>
+          <div class="wl__row">
+            <input
+              class="wl__input"
+              id="wl-email-1"
+              name="email"
+              type="email"
+              inputmode="email"
+              autocomplete="email"
+              maxlength="254"
+              placeholder="you@example.com"
+              required
+            />
+            <button class="btn btn--primary wl__btn" type="submit">Join the waitlist</button>
           </div>
-
-          <div class="phone__screen">
-            <!-- home -->
-            <div class="screen is-on" data-screen="home">
-              <div>
-                <p class="sc__hi">Morning, Yvan</p>
-                <p class="sc__sub">Boo is ready when you are</p>
-                <div class="chips">
-                  <span class="chip">Lv 7</span>
-                  <span class="chip chip--coin">◎ 240</span>
-                  <span class="chip chip--streak">6 days</span>
-                </div>
-              </div>
-              <div class="sc__stage">
-                <div class="ghost ghost--default" data-state="idle" aria-hidden="true"></div>
-              </div>
-              <div class="durs">
-                <div class="dur">1<small>min</small></div>
-                <div class="dur">5<small>min</small></div>
-                <div class="dur">15<small>min</small></div>
-                <div class="dur is-on">25<small>min</small></div>
-              </div>
-              <div class="sc__btn">Start focus</div>
-              <div class="tabs">
-                <i class="tab is-on"></i><i class="tab"></i><i class="tab"></i><i class="tab"></i>
-              </div>
-            </div>
-
-            <!-- session -->
-            <div class="screen" data-screen="session">
-              <p class="sc__label">Focusing</p>
-              <p class="sc__timer" id="scTimer">18:24</p>
-              <div class="sc__track" id="scTrack"><i></i></div>
-              <div class="sc__stage">
-                <div class="ghost ghost--default" data-state="busy" aria-hidden="true"></div>
-              </div>
-              <p class="sc__hint">Stay in the app to keep the session alive</p>
-            </div>
-
-            <!-- lockscreen with the Live Activity -->
-            <div class="screen screen--lock" data-screen="lock">
-              <div class="lockface">
-                <p class="lockface__d">Monday, 10 August</p>
-                <p class="lockface__t">9:41</p>
-              </div>
-              <div class="la">
-                <div class="la__top">
-                  <img src="assets/img/icon.webp" alt="" />Momo<span id="laTime">18:24</span>
-                </div>
-                <div class="la__body">
-                  <div class="ghost ghost--default" data-state="busy" aria-hidden="true"></div>
-                  <div class="la__side">
-                    <p class="la__lbl">Focusing — keep going</p>
-                    <div class="la__track" id="laTrack"><i></i></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- failed -->
-            <div class="screen" data-screen="fail">
-              <p class="sc__label">Session failed</p>
-              <p class="sc__timer">07:15</p>
-              <div class="sc__track"><i style="--p: 0.29"></i></div>
-              <div class="sc__stage">
-                <div class="ghost ghost--default" data-state="sad" aria-hidden="true"></div>
-              </div>
-              <p class="sc__hint"><b>You left the app.</b> No XP, no coins.</p>
-            </div>
-
-            <!-- results -->
-            <div class="screen" data-screen="results">
-              <p class="sc__label">Session complete</p>
-              <p class="sc__timer">25:00</p>
-              <div class="sc__stage" data-scale="sm">
-                <div class="ghost ghost--default" data-state="celebrating" aria-hidden="true"></div>
-              </div>
-              <div class="rewards">
-                <div class="reward reward--xp"><b>+50</b><small>xp</small></div>
-                <div class="reward reward--coin"><b>+5</b><small>coins</small></div>
-                <div class="reward reward--streak"><b>7</b><small>day streak</small></div>
-              </div>
-              <div class="sc__btn">Nice work</div>
-              <div class="tabs">
-                <i class="tab is-on"></i><i class="tab"></i><i class="tab"></i><i class="tab"></i>
-              </div>
-            </div>
-
-            <!-- room: the same session, run with other people. Your buddy in the
-                 ring, everyone else underneath — the app's own composition. -->
-            <div class="screen screen--room" data-screen="room">
-              <div class="room__bar">
-                <span class="room__code">ABC123</span>
-                <span class="room__live"><i></i>4 focusing</span>
-              </div>
-              <div class="room__me">
-                <svg class="ring" viewBox="0 0 120 120" aria-hidden="true">
-                  <circle class="ring__track" cx="60" cy="60" r="54" />
-                  <circle class="ring__fill" cx="60" cy="60" r="54" />
-                </svg>
-                <div class="ghost ghost--default" data-state="busy" aria-hidden="true"></div>
-                <span class="room__t">18:24</span>
-              </div>
-              <div class="faces room__peers">
-                <div class="face">
-                  <div><div class="ghost ghost--mint" data-state="busy"></div></div>
-                  <b>Mika</b><small>Focusing</small>
-                </div>
-                <div class="face">
-                  <div><div class="ghost ghost--ember" data-state="busy"></div></div>
-                  <b>Dee</b><small>Focusing</small>
-                </div>
-                <div class="face is-out">
-                  <div><div class="ghost ghost--shadow" data-state="sad"></div></div>
-                  <b>Kojo</b><small class="bad">Out 4:12</small>
-                </div>
-              </div>
-              <!-- The shared countdown, over the screen, once per visit. -->
-              <div class="room__count" id="roomCount"><span>3</span></div>
-            </div>
+          <!-- Honeypot: hidden from people, irresistible to bots. -->
+          <div class="hp" aria-hidden="true">
+            <label for="wl-web-1">Website</label>
+            <input id="wl-web-1" name="website" type="text" tabindex="-1" autocomplete="off" />
           </div>
-        </div>
+          <p class="wl__status" role="status" aria-live="polite"></p>
+        </form>
       </div>
 
-      <div class="acts" id="acts">
-        <article class="act" data-screen="home" data-island="off">
-          <p class="stamp">00:00</p>
-          <h2 class="rise">Pick a length.<br />Press start.</h2>
-          <p class="lede rise">
-            One, five, fifteen or twenty-five minutes. Swipe to the one you can honestly commit to
-            and hand your attention over.
-          </p>
-        </article>
-
-        <article class="act" data-screen="session" data-island="on">
-          <p class="stamp">00:12</p>
-          <h2 class="rise">Your buddy gets to work.</h2>
-          <p class="lede rise">
-            It settles into a focused wobble for as long as the clock runs. You're not watching a
-            number go down — someone is working next to you.
-          </p>
-        </article>
-
-        <article class="act" data-screen="lock" data-island="on">
-          <p class="stamp">08:30</p>
-          <h2 class="rise">Lock the screen.<br />The clock doesn't care.</h2>
-          <p class="lede rise">
-            Locking your phone never fails a session — putting it down is the whole point. The timer
-            runs on wall-clock time, and your progress stays where you can see it: a Live Activity on
-            the lockscreen, and in the Dynamic Island the moment you pick the phone back up.
-          </p>
-        </article>
-
-        <article class="act" data-screen="fail" data-island="grace">
-          <p class="stamp">17:45</p>
-          <h2 class="rise">Wander off, though,<br />and it knows.</h2>
-          <p class="lede rise">
-            Switch to another app and a ten-second grace period starts, counting down in the island.
-            Come back in time and nothing happened. Don't, and the session fails — your buddy droops,
-            and there's no XP and no coins to show for it.
-          </p>
-        </article>
-
-        <article class="act" data-screen="results" data-island="off">
-          <p class="stamp">25:00</p>
-          <h2 class="rise">Finish, and it celebrates.</h2>
-          <p class="lede rise">
-            XP, a level, and every so often a small pile of coins — rare enough that they actually
-            feel earned.
-          </p>
-        </article>
-
-        <article class="act" data-screen="room" data-island="on">
-          <p class="stamp">25:00 — together</p>
-          <h2 class="rise">Or run the whole thing<br />with two to five friends.</h2>
-          <p class="lede rise">
-            Open a room, share the six-letter code, and nobody starts until everyone has marked
-            themselves ready. Then the same 3&#8239;·&#8239;2&#8239;·&#8239;1 counts down on every
-            phone at once — the clock runs off one server timestamp, so you're genuinely in the same
-            session rather than four that happen to overlap. Give up and the others keep going,
-            while your buddy droops where everyone can see it.
-          </p>
-          <ul class="facts rise">
-            <li><b>Focus</b> — one shared timer</li>
-            <li><b>Survival</b> — no timer, last one focusing wins</li>
-            <li>Leave the app, you're out</li>
-          </ul>
-        </article>
+      <!-- Momo is the focal point; the chips are its HUD, anchored round it. -->
+      <div class="hero__stage">
+        <div class="hero__halo" aria-hidden="true"></div>
+        <div class="view view--hero" data-view="hero" role="img" aria-label="Momo, a round coral buddy, floating over its glowing ring. Tap to cheer it on."></div>
+        <div class="hud-chip hud-chip--coins" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#i-coin" /></svg><b>+5</b> coins</div>
+        <div class="hud-chip hud-chip--streak" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#i-flame" /></svg><b>12</b> day streak</div>
+        <div class="hud-chip hud-chip--time" aria-hidden="true"><span class="hud-chip__t" id="heroTime">25:00</span> focusing</div>
       </div>
     </div>
   </section>
 
   <!-- ===================== strict mode ===================== -->
-  <section class="sec" id="strict">
+  <section class="sec strict" id="strict" aria-labelledby="strict-h">
     <div class="wrap strict__in">
-      <div>
-        <p class="stamp">While the clock runs</p>
-        <h2 class="rise">The distracting apps<br />stop opening.</h2>
+      <div class="strict__copy">
+        <p class="eyebrow">Strict Mode</p>
+        <h2 id="strict-h" class="rise">The apps that eat your afternoon <span class="hot">stay shut.</span></h2>
         <p class="lede rise">
-          Hand Momo a list before you start. For the length of the session, iOS Screen Time refuses
-          to open them — not a reminder, not a nudge, just a door that doesn't budge. Momo stays lit,
-          because that's the one you're supposed to be in.
+          Pick them once. For as long as the timer runs, iOS Screen Time refuses to open them: not a
+          reminder, not a nudge, a door that doesn't budge. Momo stays open, because that's where
+          you're meant to be.
         </p>
-        <p class="hero__note rise">Strict Mode is iOS only, and entirely opt-in.</p>
+        <ul class="ticks rise">
+          <li><svg viewBox="0 0 24 24"><use href="#i-check" /></svg>Entirely opt-in. Use it every session, or never.</li>
+          <li><svg viewBox="0 0 24 24"><use href="#i-check" /></svg>Unlocks the moment the session ends.</li>
+          <li><svg viewBox="0 0 24 24"><use href="#i-check" /></svg>Your list of apps never leaves your phone.</li>
+        </ul>
       </div>
 
-      <!-- Category tiles, not real logos — the point is the state change, and
-           borrowing brand marks to show them "blocked" isn't ours to do. -->
-      <!-- A home screen, not brand logos: universally-readable category icons.
-           Reproducing real marks (and showing them "blocked") is a trademark
-           question and a store-review risk — see README. -->
-      <div class="grid-apps" id="blockGrid" aria-hidden="true">
-        <div class="tile" data-i="0">
-          <span class="tile__ico" style="--c1: #5b9dff; --c2: #2563eb">
-            <svg viewBox="0 0 24 24"><use href="#i-chat" /></svg>
-            <span class="tile__lock"><svg viewBox="0 0 24 24"><use href="#i-lock" /></svg></span>
-          </span>
-          <b>Chat</b>
-        </div>
-        <div class="tile" data-i="1">
-          <span class="tile__ico" style="--c1: #ff6b60; --c2: #d92d20">
-            <svg viewBox="0 0 24 24"><use href="#i-play" /></svg>
-            <span class="tile__lock"><svg viewBox="0 0 24 24"><use href="#i-lock" /></svg></span>
-          </span>
-          <b>Video</b>
-        </div>
-        <div class="tile" data-i="2">
-          <span class="tile__ico" style="--c1: #ffa25c; --c2: #ff4d8d">
-            <svg viewBox="0 0 24 24"><use href="#i-camera" /></svg>
-            <span class="tile__lock"><svg viewBox="0 0 24 24"><use href="#i-lock" /></svg></span>
-          </span>
-          <b>Photos</b>
-        </div>
-        <div class="tile" data-i="3">
-          <span class="tile__ico" style="--c1: #b195fb; --c2: #6d28d9">
-            <svg viewBox="0 0 24 24"><use href="#i-game" /></svg>
-            <span class="tile__lock"><svg viewBox="0 0 24 24"><use href="#i-lock" /></svg></span>
-          </span>
-          <b>Games</b>
-        </div>
-        <div class="tile tile--momo" data-momo>
-          <span class="tile__ico"><img src="assets/img/icon.webp" alt="" /></span>
-          <b>Momo</b>
-        </div>
-        <div class="tile" data-i="4">
-          <span class="tile__ico" style="--c1: #fdc45c; --c2: #f59e0b">
-            <svg viewBox="0 0 24 24"><use href="#i-cart" /></svg>
-            <span class="tile__lock"><svg viewBox="0 0 24 24"><use href="#i-lock" /></svg></span>
-          </span>
-          <b>Shop</b>
-        </div>
-        <div class="tile" data-i="5">
-          <span class="tile__ico" style="--c1: #9fb0c4; --c2: #475569">
-            <svg viewBox="0 0 24 24"><use href="#i-news" /></svg>
-            <span class="tile__lock"><svg viewBox="0 0 24 24"><use href="#i-lock" /></svg></span>
-          </span>
-          <b>News</b>
-        </div>
-        <div class="tile" data-i="6">
-          <span class="tile__ico" style="--c1: #fb8ea0; --c2: #e11d48">
-            <svg viewBox="0 0 24 24"><use href="#i-music" /></svg>
-            <span class="tile__lock"><svg viewBox="0 0 24 24"><use href="#i-lock" /></svg></span>
-          </span>
-          <b>Music</b>
-        </div>
-        <div class="tile" data-i="7">
-          <span class="tile__ico" style="--c1: #5fccf7; --c2: #0284c7">
-            <svg viewBox="0 0 24 24"><use href="#i-mail" /></svg>
-            <span class="tile__lock"><svg viewBox="0 0 24 24"><use href="#i-lock" /></svg></span>
-          </span>
-          <b>Mail</b>
-        </div>
+      <!-- Category icons, not brand logos: see README. -->
+      <div class="apps" id="appGrid" aria-hidden="true">
+        <div class="apps__shield"></div>
+        <div class="tile"><span class="tile__ico"><svg viewBox="0 0 24 24"><use href="#i-chat" /></svg><span class="tile__lock"><svg viewBox="0 0 24 24"><use href="#i-lock" /></svg></span></span><b>Chat</b></div>
+        <div class="tile"><span class="tile__ico"><svg viewBox="0 0 24 24"><use href="#i-video" /></svg><span class="tile__lock"><svg viewBox="0 0 24 24"><use href="#i-lock" /></svg></span></span><b>Video</b></div>
+        <div class="tile"><span class="tile__ico"><svg viewBox="0 0 24 24"><use href="#i-camera" /></svg><span class="tile__lock"><svg viewBox="0 0 24 24"><use href="#i-lock" /></svg></span></span><b>Photos</b></div>
+        <div class="tile"><span class="tile__ico"><svg viewBox="0 0 24 24"><use href="#i-game" /></svg><span class="tile__lock"><svg viewBox="0 0 24 24"><use href="#i-lock" /></svg></span></span><b>Games</b></div>
+        <div class="tile tile--momo"><span class="tile__ico"><img src="assets/img/icon.webp" alt="" /></span><b>Momo</b></div>
+        <div class="tile"><span class="tile__ico"><svg viewBox="0 0 24 24"><use href="#i-cart" /></svg><span class="tile__lock"><svg viewBox="0 0 24 24"><use href="#i-lock" /></svg></span></span><b>Shop</b></div>
+        <div class="tile"><span class="tile__ico"><svg viewBox="0 0 24 24"><use href="#i-news" /></svg><span class="tile__lock"><svg viewBox="0 0 24 24"><use href="#i-lock" /></svg></span></span><b>News</b></div>
+        <div class="tile"><span class="tile__ico"><svg viewBox="0 0 24 24"><use href="#i-music" /></svg><span class="tile__lock"><svg viewBox="0 0 24 24"><use href="#i-lock" /></svg></span></span><b>Music</b></div>
+        <div class="tile"><span class="tile__ico"><svg viewBox="0 0 24 24"><use href="#i-mail" /></svg><span class="tile__lock"><svg viewBox="0 0 24 24"><use href="#i-lock" /></svg></span></span><b>Mail</b></div>
       </div>
     </div>
   </section>
 
-  <!-- ===================== the cast ===================== -->
-  <section class="sec shelf cast" id="cast" data-lenis-prevent-touch>
-    <div class="wrap sec__head">
-      <p class="stamp">Between sessions</p>
-      <h2 class="rise">Spend the coins on the cast.</h2>
-      <p class="lede rise">
-        Coins buy new ghosts, pets that perch beside you while you work, and accessories. Coins only
-        — there is nothing to buy with real money, so nobody skips the part where you focus.
-      </p>
-    </div>
-    <div class="belt" id="castBelt">
-      <div class="card">
-        <div class="cast__art">
-          <div class="ghost ghost--default" data-state="idle" aria-hidden="true"></div>
+  <!-- ===================== how it works: one session, scroll-driven ===================== -->
+  <section class="how" id="how" aria-labelledby="how-h">
+    <div class="how__sticky">
+      <div class="wrap how__in">
+        <div class="how__copy">
+          <p class="eyebrow">How it works</p>
+          <h2 id="how-h" class="how__title">One session, start to finish.</h2>
+          <ol class="steps" id="steps">
+            <li class="step is-on" data-step="0">
+              <span class="step__n">01</span>
+              <h3>Press start.</h3>
+              <p>
+                Pick one, five, fifteen or twenty-five minutes, or leave it open-ended. Your buddy
+                settles in to work beside you, and the ring fills as the clock runs.
+              </p>
+            </li>
+            <li class="step" data-step="1">
+              <span class="step__n">02</span>
+              <h3>Reach for your phone? Shielded.</h3>
+              <p>
+                With Strict Mode on, the apps you picked won't open until the session ends. The
+                shield goes up and the rabbit holes stay shut.
+              </p>
+            </li>
+            <li class="step" data-step="2">
+              <span class="step__n">03</span>
+              <h3>Quit, and your buddy feels it.</h3>
+              <p>
+                Walk away early and your buddy collapses on the spot. Some deflate, some melt into a
+                puddle. No coins for that one, but a tap brings them back.
+              </p>
+            </li>
+            <li class="step" data-step="3">
+              <span class="step__n">04</span>
+              <h3>Finish, and it celebrates.</h3>
+              <p>
+                Coins rain onto the ring, your streak grows by a day, and your buddy throws a little
+                party. That is the whole game: show up, stay put, win.
+              </p>
+            </li>
+          </ol>
         </div>
-        <p class="card__name">Boo</p>
-        <span class="card__cost">Starter</span>
-      </div>
-      <div class="card">
-        <div class="cast__art">
-          <div class="ghost ghost--mint" data-state="idle" aria-hidden="true"></div>
+
+        <div class="how__stage">
+          <div class="view view--story" data-view="story" role="img" aria-label="A buddy reacting to each step of a focus session">
+          </div>
+          <!-- Overlays that ride the 3D stage. -->
+          <div class="hud" aria-hidden="true">
+            <div class="hud__timer"><span id="hudTime">25:00</span><small id="hudLabel">focusing</small></div>
+            <div class="hud__apps" id="hudApps">
+              <span class="app"><svg viewBox="0 0 24 24"><use href="#i-chat" /></svg></span>
+              <span class="app"><svg viewBox="0 0 24 24"><use href="#i-video" /></svg></span>
+              <span class="app"><svg viewBox="0 0 24 24"><use href="#i-camera" /></svg></span>
+              <span class="app"><svg viewBox="0 0 24 24"><use href="#i-game" /></svg></span>
+            </div>
+            <div class="hud__reward" id="hudReward">
+              <span class="chip chip--coin"><svg viewBox="0 0 24 24"><use href="#i-coin" /></svg>+5 coins</span>
+              <span class="chip chip--streak"><svg viewBox="0 0 24 24"><use href="#i-flame" /></svg><b id="hudStreak">7</b> day streak</span>
+            </div>
+            <div class="hud__fail" id="hudFail"><span class="chip chip--bad">Session failed · no coins</span></div>
+          </div>
+          <div class="dots" aria-hidden="true"><i class="is-on"></i><i></i><i></i><i></i></div>
         </div>
-        <p class="card__name">Mint</p>
-        <span class="card__cost">◎ 250</span>
-      </div>
-      <div class="card">
-        <div class="cast__art">
-          <div class="ghost ghost--shadow" data-state="idle" aria-hidden="true"></div>
-        </div>
-        <p class="card__name">Shadow</p>
-        <span class="card__cost">◎ 500</span>
-      </div>
-      <div class="card">
-        <div class="cast__art">
-          <div class="ghost ghost--ember" data-state="idle" aria-hidden="true"></div>
-        </div>
-        <p class="card__name">Ember</p>
-        <span class="card__cost">◎ 600</span>
-      </div>
-      <div class="card">
-        <div class="cast__art">
-          <img src="assets/img/pet-glimmer.webp" alt="Glimmer, a small glowing pet" />
-        </div>
-        <p class="card__name">Glimmer</p>
-        <span class="card__cost">◎ 100</span>
-      </div>
-      <div class="card">
-        <div class="cast__art">
-          <img src="assets/img/pet-sprout.webp" alt="Sprout, a small leafy pet" />
-        </div>
-        <p class="card__name">Sprout</p>
-        <span class="card__cost">◎ 100</span>
-      </div>
-      <div class="card">
-        <div class="cast__art">
-          <img src="assets/img/pet-faye.webp" alt="Faye, a small winged pet" />
-        </div>
-        <p class="card__name">Faye</p>
-        <span class="card__cost">◎ 180</span>
-      </div>
-      <div class="card">
-        <div class="cast__art">
-          <img src="assets/img/pet-pebblin.webp" alt="Pebblin, a small stone pet" />
-        </div>
-        <p class="card__name">Pebblin</p>
-        <span class="card__cost">◎ 180</span>
-      </div>
-      <div class="card">
-        <div class="cast__art">
-          <img src="assets/img/pet-frostpup.webp" alt="Frostpup, a small icy pet" />
-        </div>
-        <p class="card__name">Frostpup</p>
-        <span class="card__cost">◎ 320</span>
       </div>
     </div>
   </section>
 
   <!-- ===================== streaks ===================== -->
-  <section class="sec">
-    <div class="wrap story__in">
-      <div class="cal" id="cal" aria-hidden="true"></div>
-      <div class="sec__head" style="margin-bottom: 0">
-        <p class="stamp">Tomorrow</p>
-        <h2 class="rise">Don't break the chain.</h2>
+  <section class="sec streak" id="streaks" aria-labelledby="streak-h">
+    <div class="wrap streak__in">
+      <div class="flame" id="flame" aria-hidden="true">
+        <div class="flame__glow"></div>
+        <svg class="flame__svg" viewBox="0 0 200 260">
+          <defs>
+            <radialGradient id="fl-out" cx="50%" cy="78%" r="70%">
+              <stop offset="0" stop-color="#ffc0ae" />
+              <stop offset="0.45" stop-color="#ff9585" />
+              <stop offset="1" stop-color="#ff5f6d" />
+            </radialGradient>
+            <radialGradient id="fl-in" cx="50%" cy="80%" r="60%">
+              <stop offset="0" stop-color="#fff4ee" />
+              <stop offset="1" stop-color="#ffab8b" />
+            </radialGradient>
+          </defs>
+          <path class="flame__out" fill="url(#fl-out)" d="M100 250c-52 0-86-34-86-80 0-50 38-78 52-124 4 30 18 44 30 52 2-34 18-66 46-90-6 40 10 70 26 96 12 20 18 38 18 66 0 46-34 80-86 80z" />
+          <path class="flame__in" fill="url(#fl-in)" d="M100 250c-26 0-42-17-42-40 0-26 20-40 30-66 6 18 14 26 22 30 4-16 12-28 22-36 0 22 10 38 10 66 0 26-16 46-42 46z" />
+        </svg>
+        <p class="flame__n"><b id="streakN">1</b><small>day streak</small></p>
+      </div>
+      <div class="streak__copy">
+        <p class="eyebrow">Daily streaks</p>
+        <h2 class="rise">One session a day <span class="hot">keeps the flame lit.</span></h2>
         <p class="lede rise">
-          One finished session keeps the day. Miss a day and the chain resets — no shame screens, no
-          notifications begging you to come back.
+          Finish one session and the day counts. String them together and the flame grows, with
+          milestones at a week, a month, a season and a whole year. Miss a day and it starts again.
+          No guilt trips, no begging notifications.
         </p>
+        <div class="chain" id="chain" aria-hidden="true"></div>
       </div>
     </div>
   </section>
 
-  <!-- ===================== stats ===================== -->
-  <!-- The numbers screen: totals, the solo/together split, and the real heatmap
-       shape — by hour bucket down, by day across, same as the app's Stats tab. -->
-  <section class="sec" id="stats">
-    <div class="wrap sec__head">
-      <p class="stamp">Afterwards</p>
-      <h2 class="rise">Where the hours actually went.</h2>
-      <p class="lede rise">
-        Every finished session — alone or in a room — lands in the same place. No goals to set, no
-        targets to miss: just what you did, by hour and by day, in your own timezone.
-      </p>
-    </div>
-
-    <div class="wrap stats__in">
-      <div class="statgrid rise" aria-hidden="true">
-        <div class="stat">
-          <b>42h 10m</b><small>focused</small>
-        </div>
-        <div class="stat">
-          <b>168</b><small>sessions</small>
-        </div>
-        <div class="stat">
-          <b>3h 05m</b><small>best day</small>
-        </div>
-        <div class="stat stat--streak">
-          <b>12</b><small>day streak</small>
-        </div>
-        <div class="stat stat--split">
-          <span class="split">
-            <i class="split__solo" style="--w: 72%"></i><i class="split__duo" style="--w: 28%"></i>
-          </span>
-          <span class="split__k"><em class="k-solo"></em>121 on your own</span>
-          <span class="split__k"><em class="k-duo"></em>47 with friends</span>
-        </div>
-      </div>
-
-      <div class="panel">
-        <p class="panel__hd">When you focus</p>
-        <div class="heatwrap">
-          <div class="heat" data-heat></div>
-          <div class="heat__ax" aria-hidden="true">
-            <span>6a</span><span>10a</span><span>2p</span><span>6p</span><span>10p</span>
-          </div>
-        </div>
-        <div class="legend" aria-hidden="true">
-          <span>less</span>
-          <i style="--v: 20"></i><i style="--v: 45"></i><i style="--v: 70"></i><i style="--v: 100"></i>
-          <span>more</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===================== feature shelf ===================== -->
-  <section class="sec shelf feat" id="more" data-lenis-prevent-touch>
-    <div class="wrap sec__head">
-      <p class="stamp">The rest of it</p>
-      <h2 class="rise">Five things worth knowing.</h2>
-      <p class="lede rise">Drag, or just keep scrolling.</p>
-    </div>
-    <div class="belt" id="featBelt">
-      <article class="card">
-        <div class="feat__art">
-          <div class="strip" id="lockStrip">
-            <i class="on"></i><i class="on"></i><i class="on"></i><i></i><i class="on"></i>
-          </div>
-        </div>
-        <div class="feat__ico"><svg viewBox="0 0 24 24"><use href="#i-lock" /></svg></div>
-        <h3>Strict Mode</h3>
-        <p>
-          Pick the apps that ruin your afternoon and Screen Time keeps them shut until the timer runs
-          out. iOS only.
-        </p>
-      </article>
-
-      <article class="card">
-        <div class="feat__art">
-          <div class="la" style="margin: 0; width: calc(100% - 28px)">
-            <div class="la__top">
-              <img src="assets/img/icon.webp" alt="" />Momo<span>12:04</span>
-            </div>
-            <div class="la__track"><i style="--p: 0.52"></i></div>
-          </div>
-        </div>
-        <div class="feat__ico"><svg viewBox="0 0 24 24"><use href="#i-clock" /></svg></div>
-        <h3>Lockscreen &amp; island</h3>
-        <p>
-          A Live Activity keeps the countdown on your lockscreen and in the Dynamic Island, so you
-          never unlock "just to check".
-        </p>
-      </article>
-
-      <article class="card">
-        <div class="feat__art">
-          <div class="badges">
-            <img src="assets/img/badge-early-bird.webp" alt="Early bird badge" />
-            <img src="assets/img/badge-first-focus.webp" alt="First focus badge" />
-            <img src="assets/img/badge-flawless-10.webp" alt="Flawless ten badge" />
-          </div>
-        </div>
-        <div class="feat__ico"><svg viewBox="0 0 24 24"><use href="#i-medal" /></svg></div>
-        <h3>Badges worth having</h3>
-        <p>
-          Early mornings, flawless runs, a full deck of characters. They arrive quietly, without a
-          popup parade.
-        </p>
-      </article>
-
-      <article class="card">
-        <div class="feat__art">
-          <div class="badges">
-            <img src="assets/img/badge-streak-7.webp" alt="Seven day streak badge" />
-            <img src="assets/img/badge-level-10.webp" alt="Level ten badge" />
-            <img src="assets/img/badge-time-10h.webp" alt="Ten hours focused badge" />
-          </div>
-        </div>
-        <div class="feat__ico"><svg viewBox="0 0 24 24"><use href="#i-flame" /></svg></div>
-        <h3>Streaks that forgive</h3>
-        <p>
-          One finished session holds the day. The calendar shows the run without turning a missed day
-          into a guilt trip.
-        </p>
-      </article>
-
-      <article class="card">
-        <div class="feat__art">
-          <div class="ghost ghost--mint" data-state="idle" aria-hidden="true"></div>
-        </div>
-        <div class="feat__ico"><svg viewBox="0 0 24 24"><use href="#i-plane" /></svg></div>
-        <h3>Works on a plane</h3>
-        <p>
-          Solo sessions run fully offline — timer, XP and coins included. Everything syncs the moment
-          you're back on a network.
-        </p>
-      </article>
-    </div>
-  </section>
-
-  <!-- ===================== close ===================== -->
-  <section class="close" id="get">
+  <!-- ===================== achievements ===================== -->
+  <section class="sec ach" id="achievements" aria-labelledby="ach-h">
     <div class="wrap">
-      <h2 class="rise">Ready when you are.</h2>
-      <p class="lede rise">
-        No ads. No coin packs. Nothing held back for a second purchase. Just you, a timer, and a
-        small ghost who'd rather you didn't leave.
-      </p>
-      <div class="close__cta rise">
-        <a class="btn btn--primary" href="#get">Download for iOS</a>
-        <span class="btn btn--soon" aria-disabled="true">Android&nbsp;—&nbsp;</span>
+      <div class="sec__head sec__head--center">
+        <p class="eyebrow">Achievements</p>
+        <h2 id="ach-h" class="rise">42 achievements. <span class="hot">Each one pays out.</span></h2>
+        <p class="lede rise">
+          Early mornings, late nights, flawless runs, long streaks, a full collection. Every badge
+          comes with a coin bonus, so they nudge you toward your next buddy too.
+        </p>
       </div>
+      <ul class="badges" id="badges">
+        <li class="badge"><img class="badge__art" src="assets/img/badge-first-focus.webp" alt="" width="256" height="256" loading="lazy" /><b>First Focus</b><small>Complete your first session</small></li>
+        <li class="badge"><img class="badge__art" src="assets/img/badge-early-bird.webp" alt="" width="256" height="256" loading="lazy" /><b>Early Bird</b><small>Finish a session between 5 and 7am</small></li>
+        <li class="badge"><img class="badge__art" src="assets/img/badge-night-owl.webp" alt="" width="256" height="256" loading="lazy" /><b>Night Owl</b><small>Finish a session after 10pm</small></li>
+        <li class="badge"><img class="badge__art" src="assets/img/badge-streak-7.webp" alt="" width="256" height="256" loading="lazy" /><b>One Week Strong</b><small>Reach a 7-day streak</small></li>
+        <li class="badge"><img class="badge__art" src="assets/img/badge-streak-30.webp" alt="" width="256" height="256" loading="lazy" /><b>Monthlong</b><small>Reach a 30-day streak</small></li>
+        <li class="badge"><img class="badge__art" src="assets/img/badge-time-10h.webp" alt="" width="256" height="256" loading="lazy" /><b>Ten Hours Deep</b><small>Focus for 10 hours in total</small></li>
+        <li class="badge"><img class="badge__art" src="assets/img/badge-sessions-100.webp" alt="" width="256" height="256" loading="lazy" /><b>Centurion</b><small>Complete 100 sessions</small></li>
+        <li class="badge"><img class="badge__art" src="assets/img/badge-flawless-10.webp" alt="" width="256" height="256" loading="lazy" /><b>Steady Hands</b><small>10 sessions, zero interruptions</small></li>
+        <li class="badge"><img class="badge__art" src="assets/img/badge-level-10.webp" alt="" width="256" height="256" loading="lazy" /><b>Seasoned</b><small>Reach level 10</small></li>
+        <li class="badge"><img class="badge__art" src="assets/img/badge-first-friend.webp" alt="" width="256" height="256" loading="lazy" /><b>Not Alone</b><small>Add your first friend</small></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===================== friends ===================== -->
+  <section class="sec friends" id="friends" aria-labelledby="friends-h">
+    <div class="wrap">
+      <div class="sec__head">
+        <p class="eyebrow">Friends</p>
+        <h2 id="friends-h" class="rise">Better with <span class="hot">company.</span></h2>
+        <p class="lede rise">
+          Add friends, climb the leaderboards, or open a live focus room and start the same session
+          together.
+        </p>
+      </div>
+
+      <div class="duo">
+        <article class="panel rise">
+          <header class="panel__hd">
+            <span class="panel__ico"><svg viewBox="0 0 24 24"><use href="#i-trophy" /></svg></span>
+            <div><h3>Leaderboards</h3><p>Friends or global. Hours focused, not hours scrolled.</p></div>
+          </header>
+          <ol class="board" id="board">
+            <li style="--w: 100%"><span class="board__r">1</span><span class="board__av" data-buddy="ghost_mint" aria-hidden="true"></span><b>Dee</b><span class="board__bar"><i></i></span><span class="board__v">14h 20m</span></li>
+            <li class="is-you" style="--w: 84%"><span class="board__r">2</span><span class="board__av" data-buddy="ghost" aria-hidden="true"></span><b>You</b><span class="board__bar"><i></i></span><span class="board__v">12h 05m</span></li>
+            <li style="--w: 66%"><span class="board__r">3</span><span class="board__av" data-buddy="ghost_mint" aria-hidden="true"></span><b>Mika</b><span class="board__bar"><i></i></span><span class="board__v">9h 30m</span></li>
+            <li style="--w: 48%"><span class="board__r">4</span><span class="board__av" data-buddy="ghost" aria-hidden="true"></span><b>Kojo</b><span class="board__bar"><i></i></span><span class="board__v">6h 55m</span></li>
+          </ol>
+        </article>
+
+        <article class="panel rise">
+          <header class="panel__hd">
+            <span class="panel__ico panel__ico--live"><svg viewBox="0 0 24 24"><use href="#i-users" /></svg></span>
+            <div><h3>Live focus rooms</h3><p>Up to five of you. One countdown, on every phone at once.</p></div>
+          </header>
+          <div class="room">
+            <div class="room__top">
+              <span class="room__code">ABC123</span>
+              <span class="room__live"><i></i>4 focusing</span>
+            </div>
+            <div class="room__clock"><span id="roomTime">18:24</span></div>
+            <div class="room__peers">
+              <figure><span class="room__av" data-buddy="ghost" aria-hidden="true"></span><figcaption>You</figcaption></figure>
+              <figure><span class="room__av" data-buddy="ghost_mint" aria-hidden="true"></span><figcaption>Sam</figcaption></figure>
+              <figure><span class="room__av" data-buddy="ghost" aria-hidden="true"></span><figcaption>Lu</figcaption></figure>
+              <figure><span class="room__av" data-buddy="ghost_mint" aria-hidden="true"></span><figcaption>Ari</figcaption></figure>
+              <figure class="is-out"><span class="room__av" data-buddy="ghost_mint" data-mood="sad" aria-hidden="true"></span><figcaption>Mika · out</figcaption></figure>
+            </div>
+            <p class="room__note">Leave the app and you're out, while everyone else keeps going.</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== buddies ===================== -->
+  <section class="sec buddies" id="buddies" aria-labelledby="buddies-h">
+    <div class="wrap">
+      <div class="sec__head">
+        <p class="eyebrow">Buddies</p>
+        <h2 id="buddies-h" class="rise">Every session pays. <span class="hot">Spend it on a new buddy.</span></h2>
+        <p class="lede rise">
+          Finished sessions earn coins, and coins unlock new buddies, each with its own glow and its
+          own way of taking a loss. Try one: finish a session, or quit one.
+        </p>
+      </div>
+
+      <div class="lab">
+        <div class="lab__stage">
+          <div class="view view--lab" data-view="lab" role="img" aria-label="The selected buddy, live">
+          </div>
+          <div class="lab__acts">
+            <button class="btn btn--primary btn--sm" type="button" data-act="finish">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check" /></svg>Finish a session
+            </button>
+            <button class="btn btn--ghost btn--sm" type="button" data-act="quit">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-x" /></svg>Quit early
+            </button>
+          </div>
+          <p class="lab__say" id="labSay" aria-live="polite">Momo, the one you start with.</p>
+        </div>
+
+        <div class="lab__side">
+          <div class="roster" role="radiogroup" aria-label="Choose a buddy">
+            <button class="buddy is-on" type="button" role="radio" aria-checked="true" data-id="ghost">
+              <span class="buddy__view" data-buddy="ghost" aria-hidden="true"></span>
+              <span><b>Momo</b><small>The one you start with</small></span>
+            </button>
+            <button class="buddy" type="button" role="radio" aria-checked="false" data-id="ghost_mint">
+              <span class="buddy__view" data-buddy="ghost_mint" aria-hidden="true"></span>
+              <span><b>Mint</b><small>The calm one</small></span>
+            </button>
+          </div>
+          <!-- A glimpse of who is next: live, but behind frosted glass, only its glow showing through. -->
+          <div class="tease">
+            <div class="tease__frame">
+              <span class="tease__view" data-buddy="ghost_aqua" data-mood="tease" aria-hidden="true"></span>
+              <span class="tease__glass" aria-hidden="true"></span>
+            </div>
+            <p><b>More buddies are on the way.</b><small>Keep focusing. Someone new is getting ready.</small></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== join ===================== -->
+  <section class="join" id="join" aria-labelledby="join-h">
+    <div class="wrap join__in">
+      <div class="view view--join" data-view="join" role="img" aria-label="Momo waving">
+      </div>
+      <h2 id="join-h" class="rise">Make focus <span class="hot">the fun part.</span></h2>
+      <p class="lede rise">Momo lands on iOS on 1 December 2026. Join the waitlist and we'll tell you the day it's out.</p>
+
+      <form class="wl wl--center rise" data-waitlist novalidate>
+        <label class="sr-only" for="wl-email-2">Email address</label>
+        <div class="wl__row">
+          <input
+            class="wl__input"
+            id="wl-email-2"
+            name="email"
+            type="email"
+            inputmode="email"
+            autocomplete="email"
+            maxlength="254"
+            placeholder="you@example.com"
+            required
+          />
+          <button class="btn btn--primary wl__btn" type="submit">Join the waitlist</button>
+        </div>
+        <div class="hp" aria-hidden="true">
+          <label for="wl-web-2">Website</label>
+          <input id="wl-web-2" name="website" type="text" tabindex="-1" autocomplete="off" />
+        </div>
+        <p class="wl__status" role="status" aria-live="polite"></p>
+      </form>
+
+      <p class="facts">
+        <span>iOS only</span><span>Launching 1 December 2026</span>
+      </p>
     </div>
   </section>
 </main>
@@ -710,9 +511,9 @@
     <nav>
       <a href="privacy/">Privacy</a>
       <a href="terms-of-use/">Terms of Use</a>
-      <a href="mailto:support@momo.app">Support</a>
+      <a href="mailto:sabayyvan2018@gmail.com">Support</a>
     </nav>
-    <p class="ft__note">© 2026 Momo. Made for people who'd rather not be nagged.</p>
+    <p class="ft__note">© 2026 Momo. Focus doesn't have to be hard.</p>
   </div>
 </footer>
 
@@ -720,3 +521,6 @@
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
 <script src="main.js"></script>
+<script type="module" src="js/stage.js"></script>
+<script type="module" src="js/waitlist.js"></script>
+</html>

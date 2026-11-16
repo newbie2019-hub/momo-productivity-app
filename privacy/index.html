@@ -1,15 +1,15 @@
 <!--
-  BEFORE PUBLISHING, replace these placeholders (they appear in both legal pages):
-    [Legal entity]        — the company or sole trader that operates Momo
-    [Country/State]       — governing jurisdiction
-    [Business address]    — required for App Store / Play listings in some regions
-  Then have a lawyer read it. This is written to match what the app actually does,
-  but it is not legal advice.
+  Operator details are filled in (16 November 2026), so no placeholders remain on this page:
+    Operator: Yvan Sabay, an individual developer resident in the Philippines
+    Contact:  sabayyvan2018@gmail.com (the owner chose to publish it)
+    Address:  none published, by the owner's choice
+  This page was written to match what the app and website do as of the date above. It is a careful
+  template, not legal advice: have a lawyer qualified in Philippine law review it before relying on it.
 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Privacy Policy — Momo: Pomodoro Gamified</title>
-<meta name="description" content="What Momo collects, why, who it's shared with, and how to delete it." />
+<meta name="description" content="What Momo and its website collect, why, who processes it, what other users can see, and how to delete it." />
 <meta name="theme-color" content="#231D1A" />
 <link rel="canonical" href="https://momo-pomodoro.cloud/privacy/" />
 <link rel="icon" href="../assets/img/favicon.png" />
@@ -30,244 +30,515 @@
 
 <main class="wrap legal">
   <h1>Privacy Policy</h1>
-  <p class="legal__meta">Effective 10 August 2026 · Last updated 10 August 2026</p>
+  <p class="legal__meta">Effective 16 November 2026 · Last updated 16 November 2026</p>
 
   <div class="callout">
     <p>
       <strong>The short version.</strong> Momo stores your account, your focus sessions and your
-      progress so the app works across your devices and the leaderboard means something. There are no
-      ads and no advertising trackers, and we don't sell your data. If you pick apps to block in
-      Strict Mode, that list never leaves your phone. You can delete everything from inside the app,
-      permanently, at any time.
+      progress so the app works, your streaks are kept and the leaderboard means something. Your
+      name, character, level and focus time are visible to other Momo users. There are no ads, no
+      advertising trackers and no analytics SDKs, and we don't sell or share your data for
+      advertising. The apps you pick for Strict Mode never leave your phone. You can delete your
+      account and its data from inside the app at any time.
     </p>
   </div>
 
   <p>
-    This policy explains what <strong>Momo: Pomodoro Gamified</strong> ("Momo", "the app") collects,
-    why, who processes it, and what you can do about it. Momo is operated by
-    <strong>[Legal entity]</strong> ("we", "us"). Contact us any time at
-    <a href="mailto:support@momo.app">support@momo.app</a>.
+    This policy explains what <strong>Momo: Pomodoro Gamified</strong> (the iOS app, "Momo", "the
+    app") and the website at <strong>momo-pomodoro.cloud</strong> (the "website") collect, why, who
+    processes it, and what you can do about it. Momo is made and run by <strong>Yvan Sabay</strong>,
+    an individual developer based in the Philippines ("I", "we", "us"). I am the person responsible
+    for your data and you can reach me at
+    <a href="mailto:sabayyvan2018@gmail.com">sabayyvan2018@gmail.com</a>.
   </p>
 
-  <h2>1. What we collect</h2>
-
-  <h3>Account information</h3>
-  <p>
-    To sign in you provide either an <strong>email address and password</strong>, or you use
-    <strong>Sign in with Apple</strong>. If you choose Apple's "Hide My Email", we only ever receive
-    the private relay address Apple generates — not your real one. We also store the
-    <strong>display name</strong> you choose and the <strong>name you give your character</strong>.
-  </p>
-
-  <h3>Your focus sessions</h3>
-  <p>One record is written per session attempt, because this is the app's core function:</p>
+  <h2 id="contents">Contents</h2>
   <ul>
-    <li>when it started and ended, the length you chose, and the time you actually focused;</li>
-    <li>whether it completed or failed, and if it failed, why (you left the app, or you gave up);</li>
-    <li>how many times the session was interrupted;</li>
+    <li><a href="#collect">1. What we collect and where it comes from</a></li>
+    <li><a href="#visible">2. What other users can see</a></li>
+    <li><a href="#device">3. What stays on your device</a></li>
+    <li><a href="#dont">4. What we don't collect</a></li>
+    <li><a href="#why">5. Why we use it</a></li>
+    <li><a href="#notifications">6. Notifications</a></li>
+    <li><a href="#website">7. The website, the waitlist and reCAPTCHA</a></li>
+    <li><a href="#processors">8. Who processes your data</a></li>
+    <li><a href="#transfers">9. Where your data is stored</a></li>
+    <li><a href="#retention">10. How long we keep it</a></li>
+    <li><a href="#delete">11. Deleting your account</a></li>
+    <li><a href="#security">12. Security</a></li>
+    <li><a href="#rights">13. Your rights</a></li>
+    <li><a href="#children">14. Children</a></li>
+    <li><a href="#changes">15. Changes to this policy</a></li>
+    <li><a href="#contact">16. Contact</a></li>
+  </ul>
+
+  <h2 id="collect">1. What we collect and where it comes from</h2>
+
+  <h3>Account information (from you, or from Apple)</h3>
+  <p>
+    You sign in with either an <strong>email address and password</strong> or <strong>Sign in with
+    Apple</strong>. Firebase Authentication (run by Google) stores your email address, a secured
+    form of your password (we never see the password itself), your account ID and sign-in records.
+    If you use Sign in with Apple, Apple shares an email address with us, and with "Hide My Email"
+    that is a private relay address instead of your real one. Apple may also offer your name the first
+    time you sign in, but Momo doesn't store it. When you sign up with email we send a verification
+    email, and we send a reset email if you ask for one.
+  </p>
+
+  <h3>Your profile (from you, during setup and later)</h3>
+  <ul>
+    <li>your <strong>display name</strong>, and a unique <strong>@username</strong> created from it
+      that can't be changed afterwards;</li>
+    <li>the <strong>name you give your buddy</strong> (your character), the character you chose, and
+      your equipped pet;</li>
+    <li>your optional answers from onboarding: <strong>how you heard about Momo</strong> plus any
+      detail you add, <strong>roughly how many hours a day you spend on your phone</strong>, and your
+      <strong>focus goal</strong>. These tailor the app, for example the subscription screen repeats your
+      phone-hours answer back to you, and tell us which channels bring people to Momo;</li>
+    <li>your notification settings.</li>
+  </ul>
+
+  <h3>Progress and inventory (generated as you use the app)</h3>
+  <p>
+    Level, XP, weekly XP and weekly focus time, coin balance, streak, the dates of your last completed
+    session and last daily check-in, achievements and when they were unlocked, the characters and pets
+    you own, and summary stats (total and completed sessions, total focus time, longest streak,
+    uninterrupted sessions, multiplayer sessions).
+  </p>
+
+  <h3>Your focus sessions (generated as you use the app)</h3>
+  <p>The app writes one record each time you try a session, because that is its core function:</p>
+  <ul>
+    <li>start and end time, the length you chose, and how long you actually focused;</li>
+    <li>whether it completed or failed, and if it failed, why (you gave up, left the app, or the grace
+      period ran out);</li>
+    <li>how many times it was interrupted;</li>
+    <li>your <strong>local date</strong>, so streaks and the stats heatmap follow your own timezone;</li>
+    <li>solo or multiplayer, and the game mode;</li>
+    <li>the optional <strong>label</strong> you can give a session, such as "write report";</li>
+    <li>which character you used, and the XP and coins earned.</li>
+  </ul>
+  <p>Only you can read your session history.</p>
+
+  <h3>Social features (if you use them)</h3>
+  <ul>
+    <li><strong>Friends:</strong> who you've sent friend requests to or received them from, whether
+      they were accepted, and when. Friend links you share include your account ID so the other
+      person's app can find you.</li>
+    <li><strong>Presence:</strong> while you're signed in, a live status (online, focusing or offline),
+      your character's animation state, your character, and the code of a lobby you're in.</li>
+    <li><strong>Co-focus rooms:</strong> the room's name, game mode and length, whether it's private,
+      and for each member their display name, character, ready state, animation state, result, the XP
+      and coins they earned and how long they lasted. A private room's password is stored only as a
+      salted hash.</li>
+    <li><strong>Room invites:</strong> the inviter's account ID and name, the room name and code, and
+      the time sent.</li>
+  </ul>
+
+  <h3>Subscription and purchase information (from Apple, through RevenueCat)</h3>
+  <p>
+    Purchases are made through your Apple account. <strong>We never see or store your payment card
+    details.</strong> <strong>RevenueCat</strong> manages subscriptions for us. It receives your
+    purchase and subscription details from Apple, including product, transaction and trial or
+    renewal status, linked to your Momo account ID so your subscription follows you to a new device.
+    RevenueCat tells our server when your subscription status changes, and we store a simple
+    <strong>subscription tier</strong> ("pro" or "free") and the time of that change on your profile.
+  </p>
+
+  <h3>Technical and security data (collected automatically)</h3>
+  <ul>
+    <li><strong>App Check:</strong> to block fake clients and scripts, the app asks Apple's App Attest
+      (or DeviceCheck) to vouch that requests come from a genuine copy of Momo on a real Apple device.
+      Google's Firebase App Check service checks the result. This doesn't identify you.</li>
+    <li><strong>Push token:</strong> if you allow notifications, a device token so we can deliver them
+      (see <a href="#notifications">section 6</a>).</li>
+    <li><strong>Server logs:</strong> like any online service, our providers keep routine logs, such as
+      request times, IP addresses and error messages, for security and troubleshooting.</li>
+  </ul>
+
+  <h2 id="visible">2. What other users can see</h2>
+  <p>Momo is social by design. Here is what other signed-in Momo users can see:</p>
+  <ul>
+    <li><strong>The global leaderboard</strong> (top players by all-time focus time) and the
+      <strong>friends leaderboard</strong> show your display name, @username, character and pet,
+      level, XP, weekly XP, total and weekly focus time, streak and achievements.</li>
+    <li>Anyone who knows your @username can look you up and send you a friend request.</li>
+    <li>Your <strong>presence</strong> (online, focusing or offline) is visible to other signed-in
+      users, and friends see it in their friends list.</li>
+    <li>In a <strong>co-focus room</strong>, other members see your display name, character, ready
+      state and result. Public lobbies list the room name, host's display name, game mode, length and
+      member count to everyone browsing lobbies.</li>
+    <li>If a friend passes you on the weekly leaderboard, accepts your request or invites you to a
+      room, their display name appears in your notification, and yours appears in theirs.</li>
+  </ul>
+  <p>
+    <strong>An honest technical note:</strong> the app doesn't show other people your coin balance,
+    inventory, subscription tier, check-in dates, notification settings or onboarding answers.
+    However, our current database rules let any signed-in Momo account read a user's profile record,
+    and those fields are stored in it. Someone who modified the app or used developer tools could
+    therefore read them. Please don't put anything private in your names, labels or onboarding
+    answers. Your <strong>email address, password, session history, push tokens, Strict Mode
+    choices and invites sent to you are not readable</strong> by other users.
+  </p>
+
+  <h2 id="device">3. What stays on your device</h2>
+  <ul>
     <li>
-      the <strong>local date and hour</strong> in your own timezone — this is what makes streaks and
-      the "when do you focus best" heatmap correct rather than shifted by timezone;
+      <strong>Strict Mode (iOS Screen Time).</strong> When you choose apps to block, Apple's Screen
+      Time and Family Controls frameworks give Momo only an <strong>opaque token</strong>, not the
+      names or identities of the apps. Momo stores that token on your device to switch the block on and
+      off, and <strong>never sends it, or anything about which apps you chose, to us or anyone
+      else</strong>. Blocking is carried out by iOS.
     </li>
-    <li>the optional label you can give a session, such as "write report";</li>
-    <li>which character was equipped, and the XP and coins earned.</li>
+    <li>
+      <strong>Local storage.</strong> Momo keeps a small store on your device for crash recovery of an
+      active session, your last-used session length, your onboarding answers until you finish setup,
+      and your Strict Mode on/off setting. The Firebase SDK also keeps an offline copy of your own data
+      so the app works without a connection.
+    </li>
+    <li>
+      <strong>Widget and Live Activity.</strong> The home-screen widget reads a small summary of this
+      week's focus heatmap and your buddy's name stored on your device. The Lock Screen timer (Live
+      Activity) runs on your device.
+    </li>
+    <li>
+      <strong>Session reminders.</strong> The "session complete", "come back, your session is about to
+      fail" and daily reminder notifications are scheduled locally by your phone, not sent by our
+      server.
+    </li>
   </ul>
+  <p>Deleting the app removes this local data from your device.</p>
 
-  <h3>Progress and inventory</h3>
-  <p>
-    Level, XP, streak, coin balance, achievements, and which characters, pets and accessories you own
-    and have equipped.
-  </p>
-
-  <h3>Social features</h3>
-  <p>
-    If you use them: your friend connections and pending requests, your
-    <strong>presence status</strong> (online, focusing, or offline) while you are signed in, and your
-    membership of any co-focus room you join. Your profile's public fields — display name, character,
-    level, XP and streak — are visible to other signed-in users through friends lists and the
-    leaderboard. Your coin balance, purchase status, email address and notification token are
-    <strong>never</strong> readable by other users.
-  </p>
-
-  <h3>Notifications</h3>
-  <p>
-    If you allow notifications, we store a device <strong>push token</strong> so we can send session
-    reminders and friend or room activity. Denying or revoking the permission stops this, and the
-    token is removed from your account when you sign out or delete your account.
-  </p>
-
-  <h3>Subscription status</h3>
-  <p>
-    Momo requires a subscription after the free trial. Purchases are processed by
-    <strong>Apple</strong> or <strong>Google</strong> — we never see or store your card details.
-    <strong>RevenueCat</strong> manages the subscription state and tells the app whether your
-    entitlement is active. Your RevenueCat identifier is your Momo account ID, which is how your
-    subscription follows your account onto a new device.
-  </p>
-
-  <h3>Technical and abuse-prevention data</h3>
-  <p>
-    Firebase App Check attests that requests come from a genuine copy of the app, and our servers log
-    ordinary technical data (timestamps, coarse device and OS information, error traces) so we can fix
-    crashes and stop cheating on the leaderboard.
-  </p>
-
-  <h3>What stays on your device</h3>
-  <p>
-    <strong>Strict Mode (iOS)</strong> uses Apple's Screen Time and Family Controls frameworks. The
-    apps you choose to block are handled entirely on your device by the operating system. We cannot
-    see which apps you selected, and that list is never transmitted to us or to anyone else. Your
-    theme choice and other local preferences also stay on the device.
-  </p>
-
-  <h2>2. What we don't collect</h2>
+  <h2 id="dont">4. What we don't collect</h2>
   <ul>
-    <li>No advertising identifiers, ad networks or third-party ad trackers. There are no ads.</li>
-    <li>No precise location. No contacts. No microphone, camera or photo access.</li>
-    <li>No reading of your other apps' content or notifications.</li>
-    <li>No payment card details — those go directly to Apple or Google.</li>
+    <li>No advertising, ad networks, advertising identifiers (IDFA) or cross-app tracking. Momo doesn't
+      use App Tracking Transparency because it doesn't track you.</li>
+    <li>No analytics or crash-reporting SDKs.</li>
+    <li>No location, contacts, photos, camera or microphone access.</li>
+    <li>No reading of your other apps, their content, or your Screen Time usage data.</li>
+    <li>No payment card details. Apple handles payment.</li>
+    <li>No uploads of your own files or images.</li>
   </ul>
-  <p>We do not sell your personal information, and we do not share it for advertising purposes.</p>
 
-  <h2>3. Why we use it</h2>
+  <h2 id="why">5. Why we use it</h2>
+  <p>
+    We use personal data only for the purposes below. The second column gives the lawful basis,
+    using the criteria in the Philippines Data Privacy Act of 2012 and similar laws.
+  </p>
   <table>
     <tr>
       <th scope="col">Purpose</th>
-      <th scope="col">Legal basis (UK/EU GDPR)</th>
+      <th scope="col">Basis</th>
     </tr>
     <tr>
-      <td>Create and secure your account; sign you in</td>
-      <td>Performance of a contract</td>
+      <td>Create and secure your account, sign you in, verify your email, reset your password</td>
+      <td>Needed to provide the service you asked for (contract)</td>
     </tr>
     <tr>
-      <td>Run sessions, award XP and coins, keep streaks and stats</td>
-      <td>Performance of a contract</td>
+      <td>Run focus sessions, award XP and coins, keep streaks, stats and achievements</td>
+      <td>Contract</td>
     </tr>
     <tr>
-      <td>Friends, presence, co-focus rooms and the leaderboard</td>
-      <td>Performance of a contract</td>
+      <td>Friends, presence, co-focus rooms, invites and leaderboards</td>
+      <td>Contract (these are core features you choose to use)</td>
     </tr>
     <tr>
-      <td>Verify your subscription and honour the free trial</td>
-      <td>Performance of a contract</td>
+      <td>Check your subscription and provide the free trial</td>
+      <td>Contract</td>
     </tr>
     <tr>
-      <td>Send notifications you have opted into</td>
-      <td>Consent (withdraw any time in your device settings)</td>
+      <td>Send push notifications you have allowed</td>
+      <td>Consent, which you can withdraw in iOS Settings or in the app's notification settings</td>
     </tr>
     <tr>
-      <td>Prevent cheating, abuse and fraud; keep the service reliable</td>
+      <td>Tailor the app with your onboarding answers, and learn which channels bring people to Momo</td>
+      <td>Legitimate interests. The questions can be skipped.</td>
+    </tr>
+    <tr>
+      <td>Prevent cheating, abuse, fraud and attacks; keep the service running; fix errors</td>
       <td>Legitimate interests</td>
     </tr>
     <tr>
-      <td>Meet tax, accounting and legal obligations</td>
-      <td>Legal obligation</td>
+      <td>Email waitlist sign-ups about Momo's launch (website)</td>
+      <td>Consent, given when you submit your email</td>
+    </tr>
+    <tr>
+      <td>Answer your support and privacy requests</td>
+      <td>Legitimate interests, and legal obligation where a law requires a response</td>
+    </tr>
+    <tr>
+      <td>Meet tax, accounting and other legal obligations; respond to lawful requests; defend legal claims</td>
+      <td>Legal obligation, and legitimate interests in protecting our rights</td>
     </tr>
   </table>
+  <p>
+    We don't use your data for automated decisions that have legal or similarly significant effects on
+    you, and we don't profile you for advertising.
+  </p>
 
-  <h2>4. Who processes your data</h2>
-  <p>We use a small number of service providers, each under contract and only on our instructions:</p>
+  <h2 id="notifications">6. Notifications</h2>
+  <p>
+    If you allow notifications, the app registers a push token with Firebase Cloud Messaging, which
+    delivers messages through Apple's Push Notification service. The token is stored privately on your
+    account. Our server currently sends push notifications when:
+  </p>
+  <ul>
+    <li>a friend invites you to a co-focus room;</li>
+    <li>someone accepts your friend request;</li>
+    <li>a friend passes you on the weekly leaderboard.</li>
+  </ul>
+  <p>
+    You can turn each type, or all of them, off in the app's notification settings, or turn off
+    notifications for Momo in iOS Settings. The token is removed from your account when you sign out
+    or delete your account. We don't send marketing push notifications.
+  </p>
+
+  <h2 id="website">7. The website, the waitlist and reCAPTCHA</h2>
+  <p>
+    <strong>Waitlist.</strong> If you join the waitlist on momo-pomodoro.cloud, we store your
+    <strong>email address</strong>, the <strong>time you signed up</strong> and a note that the sign-up
+    came from the website, in Google Cloud Firestore. We use it only to email you about Momo's launch.
+    We won't sell it or use it for anything else, and you can ask to be removed at any time by emailing
+    <a href="mailto:sabayyvan2018@gmail.com">sabayyvan2018@gmail.com</a> or by replying to any
+    waitlist email. The waitlist is separate from app accounts, so deleting an app account doesn't
+    remove a waitlist email. Ask us to remove it.
+  </p>
+  <p>
+    <strong>reCAPTCHA.</strong> To stop bots abusing the waitlist, the website uses
+    <strong>Google reCAPTCHA Enterprise</strong> through Firebase App Check. It loads only once you
+    start using the waitlist form. reCAPTCHA collects hardware and software information, such as
+    device and browser data and interactions with the page, and sends it to Google to assess whether
+    you are a human.
+    <strong>This site is protected by reCAPTCHA and the Google
+    <a href="https://policies.google.com/privacy">Privacy Policy</a> and
+    <a href="https://policies.google.com/terms">Terms of Service</a> apply.</strong>
+  </p>
+  <p>
+    <strong>Other website services.</strong> The website loads fonts from Google Fonts and some
+    scripts from the jsDelivr content network. Like our web host, these services receive your IP
+    address and browser information when your browser requests files from them. The website has no
+    analytics, advertising or tracking cookies.
+  </p>
+
+  <h2 id="processors">8. Who processes your data</h2>
+  <p>
+    We use a small number of service providers. They process data for us to run Momo, under their own
+    terms and data-protection commitments:
+  </p>
   <table>
     <tr>
       <th scope="col">Provider</th>
-      <th scope="col">What they handle</th>
+      <th scope="col">What they do</th>
     </tr>
     <tr>
-      <td>Google (Firebase) — Google LLC / Google Ireland Ltd</td>
       <td>
-        Authentication, database storage, realtime presence, server functions, file storage, push
-        delivery, app attestation
+        Google LLC: Firebase and Google Cloud
+        (<a href="https://firebase.google.com/support/privacy">Firebase privacy</a>,
+        <a href="https://policies.google.com/privacy">Google Privacy Policy</a>)
+      </td>
+      <td>
+        Sign-in, databases (Firestore and Realtime Database), server functions, file hosting for app
+        artwork, push delivery (Cloud Messaging), App Check, server logs, and storing the website
+        waitlist
       </td>
     </tr>
     <tr>
-      <td>RevenueCat, Inc.</td>
-      <td>Subscription and entitlement management</td>
+      <td>
+        Google LLC: reCAPTCHA Enterprise, Google Fonts
+        (<a href="https://policies.google.com/privacy">Privacy Policy</a>,
+        <a href="https://policies.google.com/terms">Terms</a>)
+      </td>
+      <td>Bot protection for the waitlist; website fonts</td>
     </tr>
     <tr>
-      <td>Apple Inc. / Google LLC</td>
-      <td>App distribution, sign-in, and payment processing</td>
+      <td>
+        RevenueCat, Inc.
+        (<a href="https://www.revenuecat.com/privacy/">privacy policy</a>)
+      </td>
+      <td>Subscription and entitlement management, linked to your Momo account ID</td>
+    </tr>
+    <tr>
+      <td>
+        Apple Inc.
+        (<a href="https://www.apple.com/legal/privacy/">privacy policy</a>)
+      </td>
+      <td>
+        App Store distribution, payments and subscriptions, Sign in with Apple, push notification
+        delivery, App Attest / DeviceCheck, and Screen Time (on your device)
+      </td>
+    </tr>
+    <tr>
+      <td>
+        jsDelivr
+        (<a href="https://www.jsdelivr.com/terms/privacy-policy-jsdelivr-net">privacy policy</a>)
+      </td>
+      <td>Delivering some website scripts</td>
     </tr>
   </table>
   <p>
-    We may also disclose data if the law requires it, to protect our rights or someone's safety, or
-    as part of a merger or acquisition — in which case we will tell you before your data moves.
+    Our support email is hosted by Google (Gmail), so messages you send us are processed by Google.
+    Apple's processing for the App Store and payments is mainly governed by your own agreement with
+    Apple.
   </p>
-
-  <h2>5. Where your data is stored</h2>
   <p>
-    Our providers store and process data on servers in the <strong>United States</strong> and other
-    countries. Where data leaves the UK or EEA, transfers rely on the European Commission's Standard
-    Contractual Clauses, the UK International Data Transfer Addendum, or an adequacy decision.
+    We don't otherwise share your personal data, except where the law requires it (for example a valid
+    court order), where it's needed to protect someone's safety or our legal rights, or as part of a
+    transfer of Momo to a new owner. In that case the new owner must honour this policy, and we'll tell
+    you before your data is subject to a different one.
   </p>
 
-  <h2>6. How long we keep it</h2>
+  <h2 id="transfers">9. Where your data is stored</h2>
+  <p>
+    Momo's servers (Firebase and Google Cloud) are in the <strong>United States</strong>. RevenueCat
+    and Apple also process data in the United States and other countries. So your data will be
+    transferred to and stored in countries other than your own, which may have different
+    data-protection laws. We choose providers with recognised security and data-protection commitments,
+    and we stay responsible for your data when it's processed abroad, as the Philippines Data Privacy
+    Act requires.
+  </p>
+
+  <h2 id="retention">10. How long we keep it</h2>
   <ul>
-    <li>
-      <strong>Account, sessions, progress and social data</strong> — for as long as your account
-      exists.
-    </li>
-    <li>
-      <strong>After you delete your account</strong> — removed from live systems promptly, and purged
-      from encrypted backups within 30 days.
-    </li>
-    <li>
-      <strong>Purchase records</strong> — kept as long as tax and accounting law requires, typically
-      six to seven years. These sit with Apple, Google and RevenueCat.
-    </li>
-    <li><strong>Presence status</strong> — ephemeral; cleared automatically when you disconnect.</li>
+    <li><strong>Account, profile, progress, sessions and friends:</strong> for as long as your account
+      exists. We don't currently delete inactive accounts automatically.</li>
+    <li><strong>Presence:</strong> overwritten live, and set to offline when you disconnect.</li>
+    <li><strong>Co-focus rooms:</strong> temporary. Rooms are removed automatically once they end,
+      empty or go stale, usually within minutes and at most a few hours.</li>
+    <li><strong>Room invites:</strong> until the recipient dismisses them.</li>
+    <li><strong>Push tokens:</strong> until you sign out, delete your account, or Apple reports the
+      token is no longer valid.</li>
+    <li><strong>Waitlist emails:</strong> until we've sent launch announcements, and no later than
+      12 months after the app launches, unless you ask us to delete yours sooner.</li>
+    <li><strong>Server logs:</strong> kept for a limited period under our providers' standard log
+      retention, then deleted.</li>
+    <li><strong>Purchase records:</strong> Apple and RevenueCat keep transaction records for as long as
+      they need to under their own policies and tax and accounting law.</li>
+    <li><strong>Support emails:</strong> as long as needed to deal with your request and any follow-up.</li>
   </ul>
 
-  <h2>7. Deleting your account</h2>
+  <h2 id="delete">11. Deleting your account</h2>
   <p>
-    Open <strong>Profile → Delete account</strong> in the app. This is irreversible: it removes your
-    profile, sessions, progress, inventory, friend connections and push token. An active subscription
-    is <strong>not</strong> cancelled by deleting your account — cancel it separately through the App
-    Store or Google Play, or you will keep being billed. If you would rather we did it, email
-    <a href="mailto:support@momo.app">support@momo.app</a> from your account address.
+    Open <strong>Profile → Delete account</strong> in the app and type DELETE to confirm. This is
+    permanent and immediately deletes:
+  </p>
+  <ul>
+    <li>your profile, progress, coins, inventory, achievements and stats;</li>
+    <li>your full session history;</li>
+    <li>your push tokens;</li>
+    <li>every friendship and friend request you're part of, so you disappear from friends' lists;</li>
+    <li>your @username reservation, so it becomes available to others;</li>
+    <li>your presence status and any room invites sent to you;</li>
+    <li>your sign-in account.</li>
+  </ul>
+  <p>What isn't removed immediately:</p>
+  <ul>
+    <li>if you were in a co-focus room, your entry stays until the room is cleaned up automatically,
+      usually within hours;</li>
+    <li>room invites you sent to friends stay until they dismiss them;</li>
+    <li>copies in our providers' backup and log systems are removed on their own deletion schedules;</li>
+    <li><strong>purchase records held by Apple and RevenueCat</strong>, which are kept under their
+      policies and the law. Email us if you'd like us to ask RevenueCat to delete your customer record
+      too;</li>
+    <li>your waitlist email, if you joined on the website. Email us to remove it;</li>
+    <li>local data on your device, until you delete the app.</li>
+  </ul>
+  <p>
+    <strong>Deleting your account does not cancel your subscription.</strong> Cancel it in iOS
+    Settings → [your name] → Subscriptions, or Apple will keep billing you. If you can't use the app,
+    email <a href="mailto:sabayyvan2018@gmail.com">sabayyvan2018@gmail.com</a> from the address on
+    your account and we'll delete it for you.
   </p>
 
-  <h2>8. Your rights</h2>
+  <h2 id="security">12. Security</h2>
   <p>
-    Depending on where you live, you can ask us to give you a copy of your data, correct it, delete
-    it, restrict or object to how we use it, or send it to another service. You can withdraw consent
-    for notifications at any time in your device settings. We will never charge you for exercising
-    these rights or treat you differently for it.
+    Data is encrypted in transit (HTTPS/TLS) and encrypted at rest by Google. Database rules stop users
+    reading each other's private data, such as session history and push tokens, and stop anyone except
+    our server from changing your subscription status. App Check rejects requests that don't come from
+    a genuine copy of the app or website. Room passwords are stored only as salted hashes. As a solo
+    developer, I limit access to production data to myself.
   </p>
   <p>
-    Email <a href="mailto:support@momo.app">support@momo.app</a> and we will respond within 30 days.
-    If you are in the UK or EEA and unhappy with our response, you may complain to your national data
-    protection authority — in the UK, the Information Commissioner's Office.
-  </p>
-
-  <h2>9. Children</h2>
-  <p>
-    Momo is not intended for children under 13, and we do not knowingly collect their data. Some
-    countries set a higher age for agreeing to an online service without a parent — where that applies
-    to you, that age is the minimum instead. If you believe a child has created an account, email
-    <a href="mailto:support@momo.app">support@momo.app</a> and we will delete it.
+    No system is perfectly secure, and we can't guarantee the security of your data. If a breach
+    affects you, we'll notify you and the relevant authorities as the law requires, including the
+    Philippines National Privacy Commission where applicable.
   </p>
 
-  <h2>10. Security</h2>
+  <h2 id="rights">13. Your rights</h2>
+
+  <h3>Everyone</h3>
+  <p>Wherever you live, you can ask us to:</p>
+  <ul>
+    <li>tell you what personal data we hold about you and how we use it;</li>
+    <li>give you a copy of it, in a commonly used electronic format where practical;</li>
+    <li>correct it. You can change your display name, buddy name and notification settings yourself
+      in the app;</li>
+    <li>delete it. You can do this yourself in the app (<a href="#delete">section 11</a>);</li>
+    <li>stop or limit a use of it, or withdraw consent you've given, such as for notifications or the
+      waitlist.</li>
+  </ul>
   <p>
-    Data is encrypted in transit and at rest by our providers. Access rules stop one user reading
-    another's private data, sensitive fields such as your coin balance can only be written by our
-    servers, and App Check rejects requests that don't come from the real app. No system is perfectly
-    secure, but if a breach affects you we will notify you and the relevant regulator as the law
-    requires.
+    Email <a href="mailto:sabayyvan2018@gmail.com">sabayyvan2018@gmail.com</a>. To protect your
+    account, we may ask you to send the request from your account's email address or confirm your
+    identity in another way. We aim to respond within 30 days, and sooner where the law requires. We
+    won't charge you or treat you differently for exercising your rights. There are a few cases where
+    the law lets or requires us to keep data, and if so we'll explain why.
   </p>
 
-  <h2>11. Changes</h2>
+  <h3>Philippines (Data Privacy Act of 2012, Republic Act No. 10173)</h3>
   <p>
-    If we change this policy we will update the date above, and for anything significant we will tell
-    you in the app before it takes effect.
+    As data subjects, you have the right to be informed, to access, to object, to erasure or blocking,
+    to rectification, to data portability, to be indemnified for damages caused by inaccurate,
+    incomplete, outdated, false, unlawfully obtained or unauthorised use of personal data, and to file
+    a complaint. If you're not satisfied with our response, you can complain to the
+    <a href="https://privacy.gov.ph/">National Privacy Commission</a>.
   </p>
 
-  <h2>12. Contact</h2>
+  <h3>United States (including California and other states with privacy laws)</h3>
+  <ul>
+    <li><strong>We do not sell your personal information, and we do not "share" it for cross-context
+      behavioural advertising.</strong> We don't use it for targeted advertising or profiling, and we
+      have no actual knowledge of selling or sharing data of anyone under 16.</li>
+    <li>The categories we collect are listed in <a href="#collect">section 1</a>: identifiers (email,
+      account ID, push token), account and profile details, commercial information (subscription
+      status), app activity, and limited technical data. Their sources, purposes and recipients are in
+      sections 1, 5 and 8. We don't collect sensitive personal information as defined by those laws.</li>
+    <li>Depending on your state, you can ask to know, access, correct or delete your personal
+      information, and to opt out of sale, sharing or targeted advertising (none of which we do). You
+      can use an authorised agent. If we refuse a request, you can appeal by replying to our answer,
+      and if you're unhappy with the appeal you can contact your state Attorney General.</li>
+    <li>Because we don't sell or share data, Global Privacy Control and "Do Not Track" signals don't
+      change anything we do.</li>
+  </ul>
+
+  <h3>Other countries</h3>
   <p>
-    <strong>[Legal entity]</strong><br />
-    [Business address]<br />
-    <a href="mailto:support@momo.app">support@momo.app</a>
+    If the law where you live gives you further rights, for example to complain to a local data
+    protection authority, you can use them and we'll honour them.
   </p>
+
+  <h2 id="children">14. Children</h2>
+  <p>
+    Momo isn't directed at children under 13, and we don't knowingly collect personal information from
+    anyone under 13. You must be at least 13 to use Momo. If you are under 18, or under the age of
+    majority where you live, you need a parent's or guardian's permission. If you believe a child under
+    13 has given us personal information, email
+    <a href="mailto:sabayyvan2018@gmail.com">sabayyvan2018@gmail.com</a> and we'll delete the account
+    and its data.
+  </p>
+
+  <h2 id="changes">15. Changes to this policy</h2>
+  <p>
+    If Momo changes in a way that affects your data, we'll update this policy and the date at the top.
+    For significant changes we'll also tell you in the app or by email before they take effect. If you
+    don't agree with a change, you can delete your account.
+  </p>
+
+  <h2 id="contact">16. Contact</h2>
+  <p>
+    <strong>Yvan Sabay</strong>, developer of Momo (Philippines)<br />
+    <a href="mailto:sabayyvan2018@gmail.com">sabayyvan2018@gmail.com</a>
+  </p>
+  <p>See also the <a href="../terms-of-use/">Terms of Use</a>.</p>
 </main>
 
 <footer class="ft">
@@ -276,7 +547,7 @@
     <nav>
       <a href="../">Home</a>
       <a href="../terms-of-use/">Terms of Use</a>
-      <a href="mailto:support@momo.app">Support</a>
+      <a href="mailto:sabayyvan2018@gmail.com">Support</a>
     </nav>
     <p class="ft__note">© 2026 Momo.</p>
   </div>
